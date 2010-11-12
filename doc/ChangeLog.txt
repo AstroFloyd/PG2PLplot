@@ -1,0 +1,10 @@
+
+
+  ChangeLog.txt for PG2PLplot
+  
+  
+    1: sluys, 12/11/2010
+      - Initial version, from ~/work/codes/PPE/eggleton-tools/plplot/
+      - CMake can't find plplot.mod yet
+    
+  
