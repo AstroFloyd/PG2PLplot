@@ -257,7 +257,7 @@ function pgopen(pgdev)
   integer :: pgopen
   character, intent(in) :: pgdev*(*)
   character :: pgdev1*(len_trim(pgdev))
-  character :: pldev*99,filename*99
+  character :: pldev*(99),filename*(99)
   
   pgdev1 = pgdev
   
@@ -295,7 +295,7 @@ subroutine pgbegin(i,pgdev,nx,ny)
   integer, intent(in) :: i,nx,ny
   character, intent(in) :: pgdev*(*)
   integer :: i1
-  character :: pldev*99,filename*99
+  character :: pldev*(99),filename*(99)
   
   i1=i !Is ignored by pgbegin, can't be self, since calling argument is likely a constant
   i1 = i1

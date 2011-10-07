@@ -1,58 +1,76 @@
+##
+##  CMakeFile for PG2PLplot
+##  MvdS, 12/11/2010
+##
+##  To compile, from the directory that contains this file, do:
+##    $ mkdir build; cd build
+##    $ cmake ..
+##    $ make install
+##
+
+
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
-# Set build type. Do this *before* we set the project name
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
+# Set build type. Do this *before* we set the project name:
+if( NOT CMAKE_BUILD_TYPE )
+  set( CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
     "Choose the type of build, options are: None Debug Release RelWithDebInfo Profile."
     FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
-set(CMAKE_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}" CACHE INTERNAL "internal")
+endif( NOT CMAKE_BUILD_TYPE )
+set( CMAKE_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}" CACHE INTERNAL "internal" )
 
 
-project(PG2PLplot Fortran)
+# Project name and language:
+project( PG2PLplot Fortran )
 
+
+# Use CPack for packaging:
+#include( CPack )
+#set( CPACK_INSTALL_PREFIX_PATH ${CMAKE_INSTALL_PREFIX_PATH} )
 
 # Increase verbosity for debugging:
-option(CMAKE_VERBOSE_MAKEFILE "Verbose makefile" on)
+option( CMAKE_VERBOSE_MAKEFILE "Verbose makefile" on )
 
+# Search in the CMake/ directory for CMake modules:
+list( APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake )
 
-# Various options that we may want to enable
-option(WANT_OPENMP "Use OpenMP parallelisation (experimental)" off)
-option(WANT_SSE42  "Enable generation of SSE4.2 code" off)
-option(WANT_IPO    "Inter-procedural optimisation" off)
-option(WANT_STATIC "Generate statically linked executable" off)
-option(WANT_CHECKS "Activate runtime checks (array bounds, NaNs)" on)
-option(WANT_WARNINGS "Activate warnings" on)
-option(WANT_STRICT_FLOATS "Enable strict floating point calculations" off)
-
-
-# Search in the `cmake' directory for additional CMake modules.
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
+# Various compile/optimisation options that we may want to enable:
+include( SetCompileOptions )
 
 
 # Place the products in their directories;
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
-message ("Using compiler: " ${Fortran_COMPILER_NAME} " (" ${CMAKE_Fortran_COMPILER}")" )
-set(MODULE_DIRECTORY "/home/sluys/usr/include/PG2PLplot/${Fortran_COMPILER_NAME}")
-set(LIBRARY_OUTPUT_PATH "~/usr/lib")
+set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/PG2PLplot/${Fortran_COMPILER_NAME}" )
+set( LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/usr/lib" )
+
 
 # Find dependencies:
 find_package( PLplot REQUIRED )
 set( INCLUDE_FLAGS "-I${PLplot_INCLUDE_DIR}" )  # will be transferred to CompilerFlags
 
 
-# Source files:
-include(FileList)
+# Set Source files:
+include( FileList )
 
 # Set FORTRAN compiler flags:
-include(CompilerFlags)
+include( CompilerFlags )
 
 
-# create library
-add_library( "PG2PLplot_shared"  SHARED  ${SRC_FILES} )
-add_library( "PG2PLplot_static"  STATIC  ${SRC_FILES} )
+# Create libraries:
+if( CREATE_SHAREDLIB )
+  add_library( "PG2PLplot_shared"  SHARED  ${SRC_FILES} )
+  set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
+  set_target_properties( PG2PLplot_shared PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY})
+endif( CREATE_SHAREDLIB )
 
-set_target_properties( PG2PLplot_shared PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
-set_target_properties( PG2PLplot_shared PG2PLplot_static PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY})
+if( CREATE_STATICLIB )
+  add_library( "PG2PLplot_static"  STATIC  ${SRC_FILES} )
+  set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
+  set_target_properties( PG2PLplot_static PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY})
+endif( CREATE_STATICLIB )
 
+
+# Install to destination:
+#   use DIRECTORY rather than TARGETS to allow include/<fortrancompiler>/
+install( DIRECTORY usr/ DESTINATION ${CMAKE_INSTALL_PREFIX} )
 
