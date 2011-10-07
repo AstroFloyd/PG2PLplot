@@ -1,9 +1,8 @@
 # FFLAGS depend on the compiler
 
-if (Fortran_COMPILER_NAME STREQUAL "gfortran")
+if (Fortran_COMPILER_NAME MATCHES "gfortran")
   
   
-  set (CMAKE_Fortran_FLAGS_ALL "-I/usr/lib64/fortran/modules/plplot" )
   set (CMAKE_Fortran_FLAGS "-pipe -funroll-all-loops -O2" )
   set (CMAKE_Fortran_FLAGS_RELEASE "-pipe -funroll-all-loops -O2")
   set (CMAKE_Fortran_FLAGS_DEBUG "-g -ffpe-trap=zero,invalid -fsignaling-nans -fbacktrace")
@@ -35,9 +34,8 @@ if (Fortran_COMPILER_NAME STREQUAL "gfortran")
   set (LIB_FLAGS "-fPIC")
   #endif (WANT_LIBRARY)
   
-elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
+elseif (Fortran_COMPILER_NAME MATCHES "ifort")
   
-  set (CMAKE_Fortran_FLAGS_ALL "" )
   set (CMAKE_Fortran_FLAGS "-O2 -vec-guard-write -fpconstant -extend_source -funroll-loops -align all -ip")
   set (CMAKE_Fortran_FLAGS_RELEASE "-O2 -vec-guard-write -fpconstant -extend_source -funroll-loops -align all -ip")
   set (CMAKE_Fortran_FLAGS_DEBUG "-g -traceback")
@@ -75,7 +73,7 @@ elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   set (LIB_FLAGS "-fPIC")
   #endif (WANT_LIBRARY)
   
-else (Fortran_COMPILER_NAME STREQUAL "gfortran")
+else (Fortran_COMPILER_NAME MATCHES "gfortran")
   
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
   message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
@@ -84,11 +82,11 @@ else (Fortran_COMPILER_NAME STREQUAL "gfortran")
   set (CMAKE_Fortran_FLAGS_RELEASE "-O2")
   set (CMAKE_Fortran_FLAGS_DEBUG "-O0 -g")
   
-endif (Fortran_COMPILER_NAME STREQUAL "gfortran")
+endif (Fortran_COMPILER_NAME MATCHES "gfortran")
 
 
 
-set (USER_FLAGS "${LIB_FLAGS} ${WARN_FLAGS} ${SSE_FLAGS} ${IPO_FLAGS} ${FP_FLAGS} ${OPENMP_FLAGS} ${STATIC_FLAGS}")
+set (USER_FLAGS "${LIB_FLAGS} ${WARN_FLAGS} ${SSE_FLAGS} ${IPO_FLAGS} ${FP_FLAGS} ${OPENMP_FLAGS} ${STATIC_FLAGS} ${INCLUDE_FLAGS}")
 
 set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_ALL} ${CMAKE_Fortran_FLAGS} ${USER_FLAGS}")
 set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_ALL} ${CMAKE_Fortran_FLAGS_RELEASE} ${USER_FLAGS}")
