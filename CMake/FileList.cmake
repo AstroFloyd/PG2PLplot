@@ -1,4 +1,4 @@
 set(SRC_FILES
-  src/pg2plplot.f90
+  src/PG2PLplot.f90
   )
 
