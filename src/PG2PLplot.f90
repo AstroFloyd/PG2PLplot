@@ -663,11 +663,11 @@ end subroutine pgptxt
 !***********************************************************************************************************************************
 !> \brief  Non-standard alias for pgptxt()
 !!
-!! \param x1     X-coordinate of text
-!! \param y1     Y-coordinate of text
-!! \param ang    Angle
-!! \param just1  Justification
-!! \param text   Text to print
+!! \param x     X-coordinate of text
+!! \param y     Y-coordinate of text
+!! \param ang   Angle
+!! \param just  Justification
+!! \param text  Text to print
 !!
 !! \note  Angle only right for 0,90,180,270deg or square viewport
 
@@ -924,8 +924,8 @@ end subroutine pgpap
 !!
 !! \param xl1  Left side of the x-axis
 !! \param xr1  Right side of the x-axis
-!! \param yl1  Left side of the y-axis
-!! \param yr1  Right side of the y-axis
+!! \param yb1  Bottom side of the y-axis
+!! \param yt1  Top side of the y-axis
 
 
 subroutine pgsvp(xl1,xr1,yb1,yt1)

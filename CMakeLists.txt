@@ -59,13 +59,15 @@ include( CompilerFlags )
 # Create libraries:
 if( CREATE_SHAREDLIB )
   add_library( "PG2PLplot_shared"  SHARED  ${SRC_FILES} )
-  set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
+  set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot")
+  #set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
   #set_target_properties( PG2PLplot_shared PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY})
 endif( CREATE_SHAREDLIB )
 
 if( CREATE_STATICLIB )
   add_library( "PG2PLplot_static"  STATIC  ${SRC_FILES} )
-  set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
+  set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot")
+  #set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
   #set_target_properties( PG2PLplot_static PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY})
 endif( CREATE_STATICLIB )
 
