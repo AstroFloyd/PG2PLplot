@@ -9,13 +9,13 @@
 ##
 
 
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required( VERSION 2.6 FATAL_ERROR )
 
 # Set build type. Do this *before* we set the project name:
 if( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
     "Choose the type of build, options are: None Debug Release RelWithDebInfo Profile."
-    FORCE)
+    FORCE )
 endif( NOT CMAKE_BUILD_TYPE )
 set( CMAKE_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}" CACHE INTERNAL "internal" )
 
@@ -38,9 +38,14 @@ list( APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake )
 include( SetCompileOptions )
 
 
-# Place the products in their directories;
-get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
-#set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/PG2PLplot/${Fortran_COMPILER_NAME}" )
+# Place the products in their directories:
+get_filename_component( Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME )
+if( COMPILER_SPECIFIC_LIBS )
+  set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/PG2PLplot/${Fortran_COMPILER_NAME}" )
+else( COMPILER_SPECIFIC_LIBS )
+  set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/PG2PLplot" )
+endif( COMPILER_SPECIFIC_LIBS )
+
 set( LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/usr/lib" )
 
 
@@ -49,7 +54,7 @@ find_package( PLplot REQUIRED )
 set( INCLUDE_FLAGS "-I${PLplot_INCLUDE_DIR}" )  # will be transferred to CompilerFlags
 
 
-# Set Source files:
+# Set source files:
 include( FileList )
 
 # Set FORTRAN compiler flags:
@@ -59,16 +64,22 @@ include( CompilerFlags )
 # Create libraries:
 if( CREATE_SHAREDLIB )
   add_library( "PG2PLplot_shared"  SHARED  ${SRC_FILES} )
-  set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot")
-  #set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
-  #set_target_properties( PG2PLplot_shared PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY})
+  if( COMPILER_SPECIFIC_LIBS )
+    set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}" )
+  else( COMPILER_SPECIFIC_LIBS )
+    set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot" )
+  endif( COMPILER_SPECIFIC_LIBS )
+  set_target_properties( PG2PLplot_shared PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY} )
 endif( CREATE_SHAREDLIB )
 
 if( CREATE_STATICLIB )
   add_library( "PG2PLplot_static"  STATIC  ${SRC_FILES} )
-  set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot")
-  #set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}")
-  #set_target_properties( PG2PLplot_static PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY})
+  if( COMPILER_SPECIFIC_LIBS )
+    set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}" )
+  else( COMPILER_SPECIFIC_LIBS )
+    set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot" )
+  endif( COMPILER_SPECIFIC_LIBS )
+  set_target_properties( PG2PLplot_static PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY} )
 endif( CREATE_STATICLIB )
 
 
