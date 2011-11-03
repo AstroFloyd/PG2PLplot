@@ -21,8 +21,6 @@ if( Fortran_COMPILER_NAME MATCHES "gfortran" )
     OUTPUT_VARIABLE _compiler_output)
   string(REGEX REPLACE ".* ([0-9]\\.[0-9]\\.[0-9]).*" "\\1"
     COMPILER_VERSION ${_compiler_output})
-  #message(STATUS "Fortran compiler version: ${_compiler_output} ")
-  #message(STATUS "Fortran compiler version: ${COMPILER_VERSION}")
   
   
   set( CMAKE_Fortran_FLAGS_ALL "-std=f2008 -fall-intrinsics -pedantic" )
@@ -87,8 +85,6 @@ elseif( Fortran_COMPILER_NAME MATCHES "g95" )
     OUTPUT_VARIABLE _compiler_output)
   string(REGEX REPLACE ".*g95 ([0-9]*\\.[0-9]*).*" "\\1"
     COMPILER_VERSION ${_compiler_output})
-  #message(STATUS "Fortran compiler version: ${_compiler_output} ")
-  #message(STATUS "Fortran compiler version: ${COMPILER_VERSION}")
   
   
   set( CMAKE_Fortran_FLAGS "" )
@@ -131,8 +127,7 @@ elseif( Fortran_COMPILER_NAME MATCHES "ifort" )
     OUTPUT_VARIABLE _compiler_output)
   string(REGEX REPLACE ".* ([0-9]*\\.[0-9]*\\.[0-9]*) .*" "\\1"
     COMPILER_VERSION ${_compiler_output})
-  #message(STATUS "Fortran compiler version: ${_compiler_output} ")
-  #message(STATUS "Fortran compiler version: ${COMPILER_VERSION}")
+  
   
   set( CMAKE_Fortran_FLAGS_ALL "-nogen-interfaces" )
   set( CMAKE_Fortran_FLAGS "-vec-guard-write -fpconstant -funroll-loops -align all -ip" )
