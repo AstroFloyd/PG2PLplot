@@ -58,7 +58,7 @@ set( INCLUDE_FLAGS "-I${PLplot_INCLUDE_DIR}" )  # will be transferred to Compile
 include( FileList )
 
 # Set FORTRAN compiler flags:
-include( CompilerFlags )
+include( CompilerFlags_Fortran )
 
 
 # Create libraries:

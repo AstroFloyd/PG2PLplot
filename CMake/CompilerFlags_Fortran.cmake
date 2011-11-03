@@ -1,13 +1,35 @@
 # Compiler flags for Fortran compilers
 
+# Get compiler name:
+get_filename_component( Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME )
+
+# Are we on Linux?
+if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+  set( LINUX TRUE )
+endif( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+
 
 ######################################################################################################################################################
 #  Specific options per compiler:
 ######################################################################################################################################################
 if( Fortran_COMPILER_NAME MATCHES "gfortran" )
   
-  set( CMAKE_Fortran_FLAGS_ALL "-std=f2008 -fall-intrinsics -pedantic" )               # v.4.4
-  #set( CMAKE_Fortran_FLAGS_ALL "-fwhole-file -std=f2008 -fall-intrinsics -pedantic" )  # v.4.5
+  # Get compiler version:
+  exec_program(
+    ${CMAKE_Fortran_COMPILER}
+    ARGS --version
+    OUTPUT_VARIABLE _compiler_output)
+  string(REGEX REPLACE ".* ([0-9]\\.[0-9]\\.[0-9]).*" "\\1"
+    COMPILER_VERSION ${_compiler_output})
+  #message(STATUS "Fortran compiler version: ${_compiler_output} ")
+  #message(STATUS "Fortran compiler version: ${COMPILER_VERSION}")
+  
+  
+  set( CMAKE_Fortran_FLAGS_ALL "-std=f2008 -fall-intrinsics -pedantic" )
+  if( COMPILER_VERSION VERSION_GREATER "4.4.99" )
+    set( CMAKE_Fortran_FLAGS_ALL "${CMAKE_Fortran_FLAGS_ALL} -fwhole-file" )  # >= v.4.5
+  endif( COMPILER_VERSION VERSION_GREATER "4.4.99" )
+  
   set( CMAKE_Fortran_FLAGS "-pipe -funroll-all-loops" )
   set( CMAKE_Fortran_FLAGS_RELEASE "-pipe -funroll-all-loops" )
   set( CMAKE_Fortran_FLAGS_DEBUG "-g -ffpe-trap=zero,invalid -fsignaling-nans -fbacktrace" )
@@ -27,10 +49,16 @@ if( Fortran_COMPILER_NAME MATCHES "gfortran" )
   endif( WANT_STATIC )
   
   if( WANT_CHECKS )
-    #set( CHECK_FLAGS "-O0 -fbounds-check -ffpe-trap=zero,invalid -fsignaling-nans -fbacktrace" ) # v.4.4
-    set( CHECK_FLAGS "-O0 -fcheck=all -ffpe-trap=zero,invalid -fsignaling-nans -fbacktrace" )  # From v.4.5
+    set( CHECK_FLAGS "-ffpe-trap=zero,invalid -fsignaling-nans -fbacktrace" )
+    if( COMPILER_VERSION VERSION_GREATER "4.4.99" )
+      set( CHECK_FLAGS "-fcheck=all ${CHECK_FLAGS}" )    # >= v.4.5
+    else( COMPILER_VERSION VERSION_GREATER "4.4.99" )
+      set( CHECK_FLAGS "-fbounds-check ${CHECK_FLAGS}" ) # <= v.4.4
+    endif( COMPILER_VERSION VERSION_GREATER "4.4.99" )
+
+    set( OPT_FLAGS "-O0" )
   else( WANT_CHECKS )
-    set( CHECK_FLAGS "-O2" )
+    set( OPT_FLAGS "-O2" )
   endif( WANT_CHECKS )
   
   if( WANT_WARNINGS )
@@ -52,15 +80,27 @@ if( Fortran_COMPILER_NAME MATCHES "gfortran" )
   ####################################################################################################################################################
 elseif( Fortran_COMPILER_NAME MATCHES "g95" )
   
+  # Get compiler version:
+  exec_program(
+    ${CMAKE_Fortran_COMPILER}
+    ARGS --version
+    OUTPUT_VARIABLE _compiler_output)
+  string(REGEX REPLACE ".*g95 ([0-9]*\\.[0-9]*).*" "\\1"
+    COMPILER_VERSION ${_compiler_output})
+  #message(STATUS "Fortran compiler version: ${_compiler_output} ")
+  #message(STATUS "Fortran compiler version: ${COMPILER_VERSION}")
+  
   
   set( CMAKE_Fortran_FLAGS "" )
-  set( CMAKE_Fortran_FLAGS_RELEASE "-O2" )
-  set( CMAKE_Fortran_FLAGS_DEBUG "-O0 -g" )
+  set( CMAKE_Fortran_FLAGS_RELEASE "" )
+  set( CMAKE_Fortran_FLAGS_DEBUG "-g" )
   
   if( WANT_CHECKS )
-    set( CHECK_FLAGS "-O0 -fbounds-check -ftrace=full" )
+    set( CHECK_FLAGS "-fbounds-check -ftrace=full" )
+    set( OPT_FLAGS "-O0" )
   else( WANT_CHECKS )
-    set( CHECK_FLAGS "-O2 -fshort-circuit" )
+    set( CHECK_FLAGS "-fshort-circuit" )
+    set( OPT_FLAGS "-O2" )
   endif( WANT_CHECKS )
   
   if( WANT_WARNINGS )
@@ -84,9 +124,21 @@ elseif( Fortran_COMPILER_NAME MATCHES "g95" )
   ####################################################################################################################################################
 elseif( Fortran_COMPILER_NAME MATCHES "ifort" )
   
+  # Get compiler version:
+  exec_program(
+    ${CMAKE_Fortran_COMPILER}
+    ARGS --version
+    OUTPUT_VARIABLE _compiler_output)
+  string(REGEX REPLACE ".* ([0-9]*\\.[0-9]*\\.[0-9]*) .*" "\\1"
+    COMPILER_VERSION ${_compiler_output})
+  #message(STATUS "Fortran compiler version: ${_compiler_output} ")
+  #message(STATUS "Fortran compiler version: ${COMPILER_VERSION}")
   
   set( CMAKE_Fortran_FLAGS_ALL "-nogen-interfaces" )
   set( CMAKE_Fortran_FLAGS "-vec-guard-write -fpconstant -funroll-loops -align all -ip" )
+  if( LINUX )
+    set( CMAKE_Fortran_FLAGS_ALL "${CMAKE_Fortran_FLAGS} -mcmodel=medium" )  # -mcmodel exists for Linux only...
+  endif( LINUX )
   set( CMAKE_Fortran_FLAGS_RELEASE "-vec-guard-write -fpconstant -funroll-loops -align all -ip" )
   set( CMAKE_Fortran_FLAGS_DEBUG "-g -traceback" )
   set( CMAKE_Fortran_FLAGS_PROFILE "-g -gp" )
@@ -113,9 +165,10 @@ elseif( Fortran_COMPILER_NAME MATCHES "ifort" )
   endif( WANT_STATIC )
   
   if( WANT_CHECKS )
-    set( CHECK_FLAGS "-O0 -ftrapuv -check all -check noarg_temp_created -traceback" )
+    set( CHECK_FLAGS "-ftrapuv -check all -check noarg_temp_created -traceback" )
+    set( OPT_FLAGS "-O0" )
   else( WANT_CHECKS )
-    set( CHECK_FLAGS "-O2" )
+    set( OPT_FLAGS "-O2" )
   endif( WANT_CHECKS )
   
   if( WANT_WARNINGS )
@@ -138,9 +191,10 @@ else( Fortran_COMPILER_NAME MATCHES "gfortran" )
   message( "CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER} )
   message( "Fortran compiler: " ${Fortran_COMPILER_NAME} )
   message( "No optimized Fortran compiler flags are known, we just try -O2..." )
-  set( CMAKE_Fortran_FLAGS "-O2" )
-  set( CMAKE_Fortran_FLAGS_RELEASE "-O2" )
-  set( CMAKE_Fortran_FLAGS_DEBUG "-O0 -g" )
+  set( CMAKE_Fortran_FLAGS "" )
+  set( CMAKE_Fortran_FLAGS_RELEASE "" )
+  set( CMAKE_Fortran_FLAGS_DEBUG "-g" )
+  set( OPT_FLAGS "-O2" )
   
   
   # Package-specific flags:
@@ -158,7 +212,7 @@ endif( Fortran_COMPILER_NAME MATCHES "gfortran" )
 #  Put everything together:
 ######################################################################################################################################################
 
-set( USER_FLAGS "${LIB_FLAGS} ${CHECK_FLAGS} ${WARN_FLAGS} ${SSE_FLAGS} ${IPO_FLAGS} ${OPENMP_FLAGS} ${STATIC_FLAGS} ${INCLUDE_FLAGS} ${PACKAGE_FLAGS}" )
+set( USER_FLAGS "${OPT_FLAGS} ${LIB_FLAGS} ${CHECK_FLAGS} ${WARN_FLAGS} ${SSE_FLAGS} ${IPO_FLAGS} ${OPENMP_FLAGS} ${STATIC_FLAGS} ${INCLUDE_FLAGS} ${PACKAGE_FLAGS}" )
 
 set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_ALL} ${CMAKE_Fortran_FLAGS} ${USER_FLAGS}" )
 set( CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_ALL} ${CMAKE_Fortran_FLAGS_RELEASE} ${USER_FLAGS}" )
@@ -172,7 +226,8 @@ set( CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELEASE} -g" )
 #  Report what's going on:
 ######################################################################################################################################################
 
-message( STATUS "Using Fortran compiler: " ${Fortran_COMPILER_NAME} " (" ${CMAKE_Fortran_COMPILER}")" )
+message( STATUS "" )
+message( STATUS "Using Fortran compiler:  ${Fortran_COMPILER_NAME} ${COMPILER_VERSION}  (${CMAKE_Fortran_COMPILER})" )
 
 if( WANT_CHECKS )
   message( STATUS "Compiling with run-time checks:  ${CHECK_FLAGS}" )
@@ -189,6 +244,7 @@ endif( WANT_STATIC )
 
 
 message( STATUS "Compiler flags used:  ${CMAKE_Fortran_FLAGS}" )
+message( STATUS "" )
 
 
 
