@@ -1,4 +1,7 @@
-# Compiler flags for Fortran compilers
+## CompilerFlags_Fortran.cmake
+## Compiler flags for Fortran compilers
+## Currently, specific flags for gfortran, g95 and ifort are provided
+
 
 # Get compiler name:
 get_filename_component( Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME )
@@ -132,7 +135,7 @@ elseif( Fortran_COMPILER_NAME MATCHES "ifort" )
   set( CMAKE_Fortran_FLAGS_ALL "-nogen-interfaces" )
   set( CMAKE_Fortran_FLAGS "-vec-guard-write -fpconstant -funroll-loops -align all -ip" )
   if( LINUX )
-    set( CMAKE_Fortran_FLAGS_ALL "${CMAKE_Fortran_FLAGS} -mcmodel=medium" )  # -mcmodel exists for Linux only...
+    set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -mcmodel=medium" )  # -mcmodel exists for Linux only...
   endif( LINUX )
   set( CMAKE_Fortran_FLAGS_RELEASE "-vec-guard-write -fpconstant -funroll-loops -align all -ip" )
   set( CMAKE_Fortran_FLAGS_DEBUG "-g -traceback" )
@@ -167,7 +170,7 @@ elseif( Fortran_COMPILER_NAME MATCHES "ifort" )
   endif( WANT_CHECKS )
   
   if( WANT_WARNINGS )
-    set( WARN_FLAGS "-warn all -stand f03 -diag-disable 6894,8290" )
+    set( WARN_FLAGS "-warn all -stand f03 -diag-disable 6894,8290" )   # 8290: format for F: too many decimal places (for negative numbers)
   endif( WANT_WARNINGS )
   
   if( WANT_LIBRARY )

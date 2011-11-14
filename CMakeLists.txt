@@ -5,7 +5,8 @@
 ##  To compile, from the directory that contains this file, do:
 ##    $ mkdir build; cd build
 ##    $ cmake ..
-##    $ make install
+##    $ make
+##    $ sudo make install
 ##
 
 
@@ -28,9 +29,6 @@ project( PG2PLplot Fortran )
 #include( CPack )
 #set( CPACK_INSTALL_PREFIX_PATH ${CMAKE_INSTALL_PREFIX_PATH} )
 
-# Increase verbosity for debugging:
-option( CMAKE_VERBOSE_MAKEFILE "Verbose makefile" on )
-
 # Search in the CMake/ directory for CMake modules:
 list( APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake )
 
@@ -46,7 +44,7 @@ else( COMPILER_SPECIFIC_LIBS )
   set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/PG2PLplot" )
 endif( COMPILER_SPECIFIC_LIBS )
 
-set( LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/usr/lib" )
+set( LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/usr/lib${LIB_SUFFIX}" )
 
 
 # Find dependencies:
