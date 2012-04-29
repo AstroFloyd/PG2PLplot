@@ -1,5 +1,24 @@
 !> \file PG2PLplot.f90  Contains pgplot-to-plplot bindings (i.e., call PLplot from PGplot commands)
 
+! 
+! LICENCE:
+! 
+! Copyright 2010-2012 Marc van der Sluys
+!  
+! This file is part of the PG2PLplot package.
+!  
+! This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published
+! by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+! 
+! This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+! 
+! You should have received a copy of the GNU General Public License along with this code (LICENCE).  If not, see 
+! <http://www.gnu.org/licenses/>.
+! 
+
+
+
 !***********************************************************************************************************************************
 !> \brief  PG2PLplot module
 
@@ -104,7 +123,7 @@ subroutine pgsci(ci1)
   integer, intent(in) :: ci1
   integer :: ci2,colours(0:15)
   
-  ci2 = 15 !White
+  ci2 = 15  ! White
   ci2 = ci1
   colours = (/0,15,1,3,9,7,13,2,8,12,4,11,10,5,7,7/)
   if(ci1.ge.0.and.ci1.le.15) ci2 = colours(ci1)
@@ -554,8 +573,6 @@ end subroutine pgcont
 !! \param tr   Affine transformation elements
 
 subroutine pgconf(arr, nx,ny, ix1,ix2, iy1,iy2, c1, c2, tr)
-  use plplot, only: plflt
-  
   implicit none
   integer, intent(in) :: nx,ny, ix1,ix2, iy1,iy2
   real, intent(in) :: arr(nx,ny), c1,c2, tr(6)
@@ -663,11 +680,11 @@ end subroutine pgptxt
 !***********************************************************************************************************************************
 !> \brief  Non-standard alias for pgptxt()
 !!
-!! \param x     X-coordinate of text
-!! \param y     Y-coordinate of text
-!! \param ang   Angle
-!! \param just  Justification
-!! \param text  Text to print
+!! \param x1     X-coordinate of text
+!! \param y1     Y-coordinate of text
+!! \param ang    Angle
+!! \param just1  Justification
+!! \param text   Text to print
 !!
 !! \note  Angle only right for 0,90,180,270deg or square viewport
 
@@ -718,8 +735,8 @@ end subroutine pgtext
 !> \brief  Print text in the margin
 !!
 !! \param side   Side to print text on ('L','R','T','B')
-!! \param disp1  
-!! \param pos1   Position
+!! \param disp1  Distance from axis
+!! \param pos1   Position along axis
 !! \param just1  Justification
 !! \param text   Text to print
 
@@ -781,7 +798,7 @@ end subroutine pgmtext
 !! \todo Need to convert pgdev -> pldev + filename as in pgbegin()
 
 function pgopen(pgdev)
-  use plplot, only: plflt, plspause, plstart, plsfnam
+  use plplot, only: plspause, plstart, plsfnam
   
   implicit none
   integer :: pgopen
@@ -834,7 +851,7 @@ end function pgopen
 !! \param ny     Number of frames in the y-direction
 
 subroutine pgbegin(i,pgdev,nx,ny)
-  use plplot, only: plflt, plspause, plstart, plsfnam
+  use plplot, only: plspause, plstart, plsfnam
   
   implicit none
   integer, intent(in) :: i,nx,ny
@@ -924,8 +941,8 @@ end subroutine pgpap
 !!
 !! \param xl1  Left side of the x-axis
 !! \param xr1  Right side of the x-axis
-!! \param yb1  Bottom side of the y-axis
-!! \param yt1  Top side of the y-axis
+!! \param yl1  Left side of the y-axis
+!! \param yr1  Right side of the y-axis
 
 
 subroutine pgsvp(xl1,xr1,yb1,yt1)
@@ -1053,45 +1070,109 @@ end subroutine pgbox
 
 
 !***********************************************************************************************************************************
-!> \brief  Draw a single tick mark - no PLplot routine found
+!> \brief  Draw a single tick mark, optionally with label - no PLplot routine found
 !!
 !! \param x1      world coordinates of one endpoint of the axis
 !! \param y1      world coordinates of one endpoint of the axis
 !! \param x2      world coordinates of the other endpoint of the axis
 !! \param y2      world coordinates of the other endpoint of the axis
-!! \param v       draw the tick mark at fraction V (0<=V<=1) along the line from (X1,Y1) to (X2,Y2)
-!! \param tikl    length of tick mark drawn to left of axis
-!! \param tikr    length of major tick marks drawn to right of axis
-!! \param disp    displacement of label text to right of axis
+!!
+!! \param pos     draw the tick mark at fraction pos (0<=pos<=1) along the line from (X1,Y1) to (X2,Y2)
+!! \param tikl    length of tick mark drawn to the left or bottom of the axis - drawing ticks outside the box may not be supported
+!! \param tikr    length of major tick marks drawn to the right or top of the axis - drawing outside the box may not be supported
+!!
+!! \param disp    displacement of label text from the axis
 !! \param orient  orientation of label text, in degrees
-!! \param str     text of label (may be blank)
+!! \param lbl     text of label (may be blank)
 
-subroutine pgtick(x1, y1, x2, y2, v, tikl, tikr, disp, orient, str)
+subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
   use plplot, only: plflt
   
   implicit none
-  real, intent(in) :: x1, y1, x2, y2, v, tikl, tikr, disp, orient
-  character, intent(in) :: str*(*)
+  real, intent(in) :: x1, y1, x2, y2, pos, tikl, tikr, disp, orient
+  character, intent(in) :: lbl*(*)
   
-  integer, save :: warn
-  real :: x
-  character :: str1*(len(str))
+  real :: x,y,dx,dy, dpx,dpy, reldiff
+  real(plflt) :: p_xmin,p_xmax,p_ymin,p_ymax, plx1,plx2,ply1,ply2, tlen, disp1,pos1,just
+  character :: lbl1*(len(lbl))
   
-  x = x1
-  x = x2
-  x = y1
-  x = y2
-  x = v
-  x = tikl
-  x = tikr
-  x = disp
-  x = orient
-  x = x  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
-  str1 = str
-  str1 = str1  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
+  disp1 = disp
+  x = orient  ! Unused
+  x = x       ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
+  lbl1 = lbl
   
-  if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgtick()  ***'
-  warn = 123
+  dx = x2 - x1
+  dy = y2 - y1
+  x  = x1 + pos*dx
+  y  = y1 + pos*dy
+  
+  call plgvpw(p_xmin, p_xmax, p_ymin, p_ymax)
+  
+  dpx = real(abs(p_xmax-p_xmin))
+  dpy = real(abs(p_ymax-p_ymin))
+  
+  
+  tlen = 0.03  ! default size of a tickmark
+  pos1 = pos
+  just = 0.5
+  
+  if(reldiff(y1,y2) .le. epsilon(y1)*10 .or. (y1.eq.0.0 .and. y2.eq.0.0)) then                  ! Want horizontal axis
+     
+     plx1 = x
+     plx2 = x
+     ply1 = y
+     
+     ! Plot ticks below the axis:
+     if(tikl.gt.tiny(tikl)) then
+        ply2 = y - dpy * tikl * tlen
+        call pljoin(plx1,ply1,plx2,ply2)
+     end if
+     
+     ! Plot ticks above the axis:
+     if(tikr.gt.tiny(tikr)) then
+        ply2 = y + dpy * tikr * tlen
+        call pljoin(plx1,ply1,plx2,ply2)
+     end if
+     
+     ! Print labels:
+     if(abs(reldiff(y,real(p_ymin))) .le. epsilon(y)*10 .or. (y.eq.0.0 .and. p_ymin.eq.0.0)) then
+        call plmtex('B', disp1, pos1, just, trim(lbl1))                                         ! Print label below the bottom axis
+     else
+        call plmtex('T', disp1, pos1, just, trim(lbl1))                                         ! Print label above the top axis
+     end if
+     
+  else if(reldiff(x1,x2) .le. epsilon(x1)*10 .or. (x1.eq.0.0 .and. x2.eq.0.0)) then             ! Want vertical axis
+     
+     ply1 = y
+     ply2 = y
+     plx1 = x
+     
+     ! Plot ticks to the left of the axis:
+     if(tikl.gt.tiny(tikl)) then
+        plx2 = x - dpx * tikl * tlen
+        call pljoin(plx1,ply1, plx2,ply2)
+     end if
+          
+     ! Plot ticks to the right of the axis:
+     if(tikr.gt.tiny(tikr)) then
+        plx2 = x + dpx * tikr * tlen
+        call pljoin(plx1,ply1, plx2,ply2)
+     end if
+     
+     ! Print labels:
+     if(abs(reldiff(x,real(p_xmin))) .le. epsilon(x)*10 .or. (x.eq.0.0 .and. p_xmin.eq.0.0)) then
+        call plmtex('L', disp1, pos1, just, trim(lbl1))                           ! Print label to the left of the left-hand axis
+     else
+        call plmtex('R', disp1, pos1, just, trim(lbl1))                           ! Print label to the right of the right-hand axis
+     end if
+     
+  else
+     write(0, '(A)') "PG2PLplot, pgtick(): x1!=x2 and y1!=y2 - I don't know which axis you want to use..."
+     print*,'x:',x1,x2,reldiff(x1,x2)
+     print*,'y:',y1,y2,reldiff(y1,y2)
+  end if
+  
+  
   
 end subroutine pgtick
 !***********************************************************************************************************************************
@@ -1104,7 +1185,6 @@ end subroutine pgtick
 !! \todo No plplot routine found yet - using dummy
 
 subroutine pgolin(maxpt, npt, x, y, symbol)
-  use plplot, only: plflt
   
   implicit none
   integer, intent(in) :: maxpt,symbol
@@ -1207,3 +1287,32 @@ subroutine replace_substring(string, str_in, str_out)
   
 end subroutine replace_substring
 !***********************************************************************************************************************************
+
+
+!***********************************************************************************************************************************
+!> \brief  Return the relative difference between two numbers: dx/\<x\>  -  taken from libSUFR, turned into single precision
+!!
+!! \param x1  First number
+!! \param x2  Second number
+
+function reldiff(x1,x2)
+  implicit none
+  real, intent(in) :: x1,x2
+  real :: reldiff, xsum,xdiff
+  
+  xsum  = x1+x2
+  xdiff = x2-x1
+  if(abs(xsum).gt.tiny(xsum)) then
+     reldiff = xdiff / (xsum*0.5)
+  else                     ! Can't divide by zero
+     if(abs(xdiff).gt.tiny(xdiff)) then
+        reldiff = xdiff
+     else
+        reldiff = 1.0  ! 0/0
+     end if
+  end if
+  
+end function reldiff
+!***********************************************************************************************************************************
+
+  
