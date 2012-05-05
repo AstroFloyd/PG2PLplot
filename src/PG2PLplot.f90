@@ -30,6 +30,7 @@ module PG2PLplot
   
   !> Conversion factor for the character height
   real(plflt), parameter :: ch_fac = 0.35_plflt
+  logical, parameter :: compatibility_warnings = .false.  ! Don't warn
   
 end module PG2PLplot
 !***********************************************************************************************************************************
@@ -82,15 +83,17 @@ end subroutine pgslw
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  Query line width - dymmy routine
+!> \brief  Query line width - dummy routine
 !!
 !! \param lw  Line width
 
 subroutine pgqlw(lw)
+  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(out) :: lw
   integer, save :: warn
   
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgqlw()  ***'
   warn = 123
   
@@ -201,6 +204,7 @@ end subroutine pgqcr
 !! \param  ci2  Upper colour index 
 
 subroutine pgscir(ci1,ci2)
+  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(in) :: ci1,ci2
   integer :: tmp
@@ -210,6 +214,7 @@ subroutine pgscir(ci1,ci2)
   tmp = ci2
   tmp = tmp  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
   
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgscir()  ***'
   warn = 123
   
@@ -224,6 +229,7 @@ end subroutine pgscir
 !! \param  ci2  Upper colour index 
 
 subroutine pgqcir(ci1,ci2)
+  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(out) :: ci1,ci2
   integer, save :: warn
@@ -231,6 +237,7 @@ subroutine pgqcir(ci1,ci2)
   ci1 = 0
   ci2 = 255
   
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgqcir()  ***'
   warn = 123
   
@@ -343,6 +350,7 @@ end subroutine pgqch
 !> \brief  Set arrow head - dummy routine
 
 subroutine pgsah(fs, angle, barb)
+  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(in) :: fs
   real, intent(in) :: angle, barb
@@ -354,6 +362,7 @@ subroutine pgsah(fs, angle, barb)
   tmp = nint(barb)
   tmp = tmp  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
   
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgsah()  ***'
   warn = 123
   
@@ -440,7 +449,7 @@ subroutine pgpoint(n,x1,y1,s)
   y2 = y1
   
   call plpoin(x2,y2,s)
-  !call plsym(x2,y2,s)  ! Produces Hershey -> many letters, etc
+  !call plsym(1,x2,y2,143)  ! Produces Hershey -> many letters, etc
   
 end subroutine pgpoint
 !***********************************************************************************************************************************
@@ -573,6 +582,7 @@ end subroutine pgcont
 !! \param tr   Affine transformation elements
 
 subroutine pgconf(arr, nx,ny, ix1,ix2, iy1,iy2, c1, c2, tr)
+  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(in) :: nx,ny, ix1,ix2, iy1,iy2
   real, intent(in) :: arr(nx,ny), c1,c2, tr(6)
@@ -599,6 +609,7 @@ subroutine pgconf(arr, nx,ny, ix1,ix2, iy1,iy2, c1, c2, tr)
   !
   !call plshade1(arr1, ix1,ix2, iy1,iy2, clevel, tr1)
   
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgconf()  ***'
   warn = 123
   
@@ -1185,6 +1196,7 @@ end subroutine pgtick
 !! \todo No plplot routine found yet - using dummy
 
 subroutine pgolin(maxpt, npt, x, y, symbol)
+  use PG2PLplot, only: compatibility_warnings
   
   implicit none
   integer, intent(in) :: maxpt,symbol
@@ -1200,6 +1212,7 @@ subroutine pgolin(maxpt, npt, x, y, symbol)
   symbol1 = symbol
   symbol1 = symbol1  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
   
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgolin()  ***'
   warn = 123
   
@@ -1257,6 +1270,7 @@ subroutine pg2pldev(pgdev, pldev,filename)
   call replace_substring(pldev,'ppm','png')
   call replace_substring(filename,'ppm','png')
   
+  !call replace_substring(pldev,'png','pngqt')
   !write(0,'(A)')trim(pgdev)//' - '//trim(pldev)//' - '//trim(filename)
   
   !stop
