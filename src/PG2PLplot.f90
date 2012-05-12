@@ -30,7 +30,8 @@ module PG2PLplot
   
   !> Conversion factor for the character height
   real(plflt), parameter :: ch_fac = 0.35_plflt
-  logical, parameter :: compatibility_warnings = .false.  ! Don't warn
+  !logical, parameter :: compatibility_warnings = .false.  ! Don't warn
+  logical, parameter :: compatibility_warnings = .true.   ! Do warn
   
 end module PG2PLplot
 !***********************************************************************************************************************************
