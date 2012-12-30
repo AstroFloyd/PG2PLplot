@@ -84,4 +84,4 @@ endif( CREATE_STATICLIB )
 # Install to destination:
 #   use DIRECTORY rather than TARGETS to allow include/<fortrancompiler>/
 install( DIRECTORY usr/ DESTINATION ${CMAKE_INSTALL_PREFIX} )
-
+install( FILES src/rgb.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/share/PG2PLplot)
