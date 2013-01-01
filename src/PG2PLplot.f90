@@ -39,6 +39,8 @@ module PG2PLplot
   integer :: save_fweight(max_level)
   integer :: save_lwidth(max_level)
   integer :: cur_lwidth
+  logical :: set_paper = .false.
+  real(8) :: paper_width, paper_ratio
 end module PG2PLplot
 !***********************************************************************************************************************************
 
@@ -805,6 +807,11 @@ end function check_error
 !> \brief  Start a new plot
 !!
 !! \param pgdev  PGplot device
+!!
+!! This function creates a new stream for each xwin request, but uses
+!! the same stream (0) for each file stream request.  Xwin streams are
+!! treated differently since we want bufferring for smooth animations
+!! whereas the other streams are non-buffered.
 
 function pgopen(pgdev)
   use plplot, only: plspause, plstart, plsfnam, plsdev
@@ -814,27 +821,40 @@ function pgopen(pgdev)
   integer :: cur_stream, check_error
   character, intent(in) :: pgdev*(*)
   character :: pldev*(99),filename*(99)
+  logical :: is_init = .false.
   filename = 'plot_temp.png'
   call pg2pldev(pgdev, pldev,filename)
+
   if(trim(pldev).ne.'xwin') then
-     cur_stream = 0
-     call plsstrm(0)
      if (check_error(trim(filename)).ne. 0) then
         pgopen = -1
         return
      endif
+     cur_stream = 0
+     call plsstrm(0)
+     call plssub(1, 1)
+     if (.not. is_init) then
+        call plend1()
+     else
+        is_init = .true.
+     endif
+
+     call plsdev(trim(pldev))
      call plsfnam(trim(filename))         ! Set output file name
+     call do_pgpap()
+     call plinit()
+     call plbop()
   else
      call plmkstrm(cur_stream)
      call plsetopt("db", "")
+     call plstart(trim(pldev), 1, 1)
+     call plbop()
   endif
 
   !call plscolbg(255,255,255)           ! Set background colour to white
   call plfontld(1)                     ! Load extended character set(?)
-  call plstart(trim(pldev), 1, 1)
-  pgopen = cur_stream + 1
-  call plbop()
   call plspause(.false.)                ! Pause at plend()
+  pgopen = cur_stream + 1
 end function pgopen
 !***********************************************************************************************************************************
 
@@ -846,6 +866,9 @@ end function pgopen
 !! \param pgdev  PGplot device
 !! \param nx     Number of frames in the x-direction
 !! \param ny     Number of frames in the y-direction
+!! 
+!! This is a bit simplier since I don't need to create a new stream
+!! for each request.
 
 subroutine pgbegin(i,pgdev,nx,ny)
   use plplot, only: plspause, plstart, plsfnam, plsetopt
@@ -863,6 +886,7 @@ subroutine pgbegin(i,pgdev,nx,ny)
         return
      endif
      call plsfnam(trim(filename))         ! Set output file name
+     call do_pgpap()
   else
      call plsetopt("db", "")
   endif
@@ -894,22 +918,32 @@ end subroutine pgend
 !! \param ratio  Paper aspect ratio
 
 subroutine pgpap(width,ratio)
-  use plplot, only: plflt
-  
+  use PG2PLplot, only: set_paper, paper_width, paper_ratio
   implicit none
-  real, intent(in) :: width,ratio
+  integer, intent(in) :: width, ratio
+  set_paper = .true.
+  paper_width = width
+  paper_ratio = ratio
+end subroutine pgpap
+
+subroutine do_pgpap()
+  use PG2PLplot, only: set_paper, paper_width, paper_ratio
+  use plplot, only : plflt
+  implicit none
   integer :: xlen,ylen,xoff,yoff
   real(kind=plflt) :: xp,yp
-  
+  if (.not. set_paper) then
+     return
+  endif
+  set_paper = .false.
   xp = 300.  !DPI
-  yp = 300.  
-  xlen = nint(width*xp)
-  ylen = nint(width*xp*ratio)
+  yp = 300.
+  xlen = nint(paper_width*xp)
+  ylen = nint(paper_width*xp*paper_ratio)
   xoff = 0  !Offset
   yoff = 0
-  
   call plspage(xp,yp,xlen,ylen,xoff,yoff)  ! Must be called before plinit()!
-end subroutine pgpap
+end subroutine do_pgpap
 !***********************************************************************************************************************************
 
 
@@ -999,7 +1033,6 @@ end subroutine pgpage
 
 subroutine pgbbuf()
   implicit none
-  call plbop()
 end subroutine pgbbuf
 !***********************************************************************************************************************************
 
@@ -1008,7 +1041,6 @@ end subroutine pgbbuf
 
 subroutine pgebuf()
   implicit none
-  call pleop()
 end subroutine pgebuf
 !***********************************************************************************************************************************
 
@@ -1175,8 +1207,8 @@ subroutine pg2pldev(pgdev, pldev,filename)
   call replace_substring(pldev,'ppm','png')
   call replace_substring(filename,'ppm','png')
   if (trim(pldev).eq.'png') then
-     pldev = 'pngcairo' ! use pngcairo if png since it I get X errors
-     ! if outputing to both X11 and png
+     pldev = 'pngcairo' ! use pngcairo if png since it I get segfaults
+     ! if outputing to both X11 and png which pulls in pngqt
   endif
   !write(0,'(A)')trim(pgdev)//' - '//trim(pldev)//' - '//trim(filename)
   
@@ -1215,7 +1247,14 @@ end subroutine replace_substring
 
 subroutine pgslct(pgdev)
   integer, intent(in) :: pgdev
-  call pleop()
+  integer cur_stream
+  call plgstrm(cur_stream)
+  ! Note I call pleop only for XWin stream
+  ! which are buffered.  For all other streams
+  ! I don't want to end the page
+  if (cur_stream .ne. 0) then
+     call pleop()
+  endif
   call plsstrm(pgdev-1)
 end subroutine pgslct
 
