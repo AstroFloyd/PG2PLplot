@@ -19,6 +19,7 @@
 
 
 
+
 !***********************************************************************************************************************************
 !> \brief  PG2PLplot module
 
@@ -30,9 +31,16 @@ module PG2PLplot
   
   !> Conversion factor for the character height
   real(plflt), parameter :: ch_fac = 0.35_plflt
-  !logical, parameter :: compatibility_warnings = .false.  ! Don't warn
-  logical, parameter :: compatibility_warnings = .true.   ! Do warn
-  
+  real(8) :: xcur=0, ycur=0
+  integer :: save_level = 0
+  integer, parameter :: max_level = 20
+  integer :: save_ffamily(max_level)
+  integer :: save_fstyle(max_level)
+  integer :: save_fweight(max_level)
+  integer :: save_lwidth(max_level)
+  integer :: cur_lwidth
+  logical :: set_paper = .false.
+  real(8) :: paper_width, paper_ratio
 end module PG2PLplot
 !***********************************************************************************************************************************
 
@@ -69,10 +77,11 @@ end subroutine pgsls
 !! \param lw  Line width
 
 subroutine pgslw(lw)
+  use PG2PLplot, only : cur_lwidth
   implicit none
   integer, intent(in) :: lw
   integer :: lw1,lw2
-  
+  cur_lwidth = lw
   lw1 = max(min(lw,201),1)
   lw2 = lw1 - 1
   
@@ -84,22 +93,15 @@ end subroutine pgslw
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  Query line width - dummy routine
+!> \brief  Query line width - dymmy routine
 !!
 !! \param lw  Line width
 
 subroutine pgqlw(lw)
-  use PG2PLplot, only: compatibility_warnings
+  use PG2PLplot, only : cur_lwidth
   implicit none
   integer, intent(out) :: lw
-  integer, save :: warn
-  
-  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
-  if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgqlw()  ***'
-  warn = 123
-  
-  lw = 1
-  
+  lw = cur_lwidth
 end subroutine pgqlw
 !***********************************************************************************************************************************
 
@@ -127,7 +129,7 @@ subroutine pgsci(ci1)
   integer, intent(in) :: ci1
   integer :: ci2,colours(0:15)
   
-  ci2 = 15  ! White
+  ci2 = 15 !White
   ci2 = ci1
   colours = (/0,15,1,3,9,7,13,2,8,12,4,11,10,5,7,7/)
   if(ci1.ge.0.and.ci1.le.15) ci2 = colours(ci1)
@@ -205,7 +207,6 @@ end subroutine pgqcr
 !! \param  ci2  Upper colour index 
 
 subroutine pgscir(ci1,ci2)
-  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(in) :: ci1,ci2
   integer :: tmp
@@ -215,7 +216,6 @@ subroutine pgscir(ci1,ci2)
   tmp = ci2
   tmp = tmp  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
   
-  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgscir()  ***'
   warn = 123
   
@@ -230,7 +230,6 @@ end subroutine pgscir
 !! \param  ci2  Upper colour index 
 
 subroutine pgqcir(ci1,ci2)
-  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(out) :: ci1,ci2
   integer, save :: warn
@@ -238,7 +237,6 @@ subroutine pgqcir(ci1,ci2)
   ci1 = 0
   ci2 = 255
   
-  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgqcir()  ***'
   warn = 123
   
@@ -351,7 +349,6 @@ end subroutine pgqch
 !> \brief  Set arrow head - dummy routine
 
 subroutine pgsah(fs, angle, barb)
-  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(in) :: fs
   real, intent(in) :: angle, barb
@@ -363,7 +360,6 @@ subroutine pgsah(fs, angle, barb)
   tmp = nint(barb)
   tmp = tmp  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
   
-  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgsah()  ***'
   warn = 123
   
@@ -450,7 +446,7 @@ subroutine pgpoint(n,x1,y1,s)
   y2 = y1
   
   call plpoin(x2,y2,s)
-  !call plsym(1,x2,y2,143)  ! Produces Hershey -> many letters, etc
+  !call plsym(x2,y2,s)  ! Produces Hershey -> many letters, etc
   
 end subroutine pgpoint
 !***********************************************************************************************************************************
@@ -583,7 +579,6 @@ end subroutine pgcont
 !! \param tr   Affine transformation elements
 
 subroutine pgconf(arr, nx,ny, ix1,ix2, iy1,iy2, c1, c2, tr)
-  use PG2PLplot, only: compatibility_warnings
   implicit none
   integer, intent(in) :: nx,ny, ix1,ix2, iy1,iy2
   real, intent(in) :: arr(nx,ny), c1,c2, tr(6)
@@ -610,7 +605,6 @@ subroutine pgconf(arr, nx,ny, ix1,ix2, iy1,iy2, c1, c2, tr)
   !
   !call plshade1(arr1, ix1,ix2, iy1,iy2, clevel, tr1)
   
-  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgconf()  ***'
   warn = 123
   
@@ -656,11 +650,9 @@ subroutine pgptxt(x1,y1,ang,just1,text)
   ! Convert angle -> dy/dx
   dx = (xmax-xmin)*0.1
   
-  !if(abs(ang).lt.1.e-5) then                       ! ang ~ 0 deg
-  !   dx = -1.0
-  !   dy =  0.0
-  !else 
-  if(abs(mod(ang-90.,180.)).lt.1.e-5) then    ! ang = +/-90deg
+  if (abs(ang).lt.1.e-5) then            ! ang ~ 0 deg
+     dy =  0.0
+  elseif(abs(mod(ang-90.,180.)).lt.1.e-5) then    ! ang = +/-90deg
      dx = 0.
      dy = -1.                                      ! ang = -90deg
      if(abs(mod(ang-90.,360.)).lt.1.e-5) dy = 1.   ! ang = +90deg
@@ -692,11 +684,11 @@ end subroutine pgptxt
 !***********************************************************************************************************************************
 !> \brief  Non-standard alias for pgptxt()
 !!
-!! \param x1     X-coordinate of text
-!! \param y1     Y-coordinate of text
-!! \param ang    Angle
-!! \param just1  Justification
-!! \param text   Text to print
+!! \param x     X-coordinate of text
+!! \param y     Y-coordinate of text
+!! \param ang   Angle
+!! \param just  Justification
+!! \param text  Text to print
 !!
 !! \note  Angle only right for 0,90,180,270deg or square viewport
 
@@ -747,8 +739,8 @@ end subroutine pgtext
 !> \brief  Print text in the margin
 !!
 !! \param side   Side to print text on ('L','R','T','B')
-!! \param disp1  Distance from axis
-!! \param pos1   Position along axis
+!! \param disp1  
+!! \param pos1   Position
 !! \param just1  Justification
 !! \param text   Text to print
 
@@ -798,7 +790,16 @@ subroutine pgmtext(side, disp, pos, just, text)
 end subroutine pgmtext
 !***********************************************************************************************************************************
 
-
+function check_error(fname)
+  implicit none
+  character, intent(in) :: fname*(*)
+  integer :: err, check_error
+  open(9999, file=trim(fname), err=450, iostat=err)
+  close(9999)
+  check_error = 0
+  return
+450 check_error = err
+end function check_error
 
 
 
@@ -807,49 +808,53 @@ end subroutine pgmtext
 !!
 !! \param pgdev  PGplot device
 !!
-!! \todo Need to convert pgdev -> pldev + filename as in pgbegin()
+!! This function creates a new stream for each xwin request, but uses
+!! the same stream (0) for each file stream request.  Xwin streams are
+!! treated differently since we want bufferring for smooth animations
+!! whereas the other streams are non-buffered.
 
 function pgopen(pgdev)
-  use plplot, only: plspause, plstart, plsfnam
-  
+  use plplot, only: plspause, plstart, plsfnam, plsdev
+  use plplot, only: plmkstrm, plsetopt
   implicit none
   integer :: pgopen
+  integer :: cur_stream, check_error
   character, intent(in) :: pgdev*(*)
-  !character :: pgdev1*(len_trim(pgdev))
   character :: pldev*(99),filename*(99)
-  
-  !pgdev1 = pgdev
-  !
-  !!pldev = 'xwin'
-  !!pldev = 'wxwidgets'
-  !!pldev = 'xcairo'
-  !!pldev = 'qtwidget'
-  !
-  !pldev = 'png'       !No anti-aliasing in lines
-  !!pldev = 'wxpng'     !No extended characters
-  !!pldev = 'pngcairo'
-  !!pldev = 'pngqt'
-  !
-  !filename = 'plot_temp.png'
-  
-  
+  logical :: is_init = .false.
+  filename = 'plot_temp.png'
   call pg2pldev(pgdev, pldev,filename)
-  
-  !write(0,'(A)')'pgopen: '//trim(pgdev)//' - '//trim(pldev)//' - '//trim(filename)
-  
-  !call plsdev(trim(pldev))
-  !call plinit()
-  
-  if(trim(pldev).ne.'xwin') call plsfnam(trim(filename))         ! Set output file name
-  call plfontld(1)                     ! Load extended character set(?)
-  call plspause(.true.)                ! Pause at plend()
+
+  if(trim(pldev).ne.'xwin') then
+     if (check_error(trim(filename)).ne. 0) then
+        pgopen = -1
+        return
+     endif
+     cur_stream = 0
+     call plsstrm(0)
+     call plssub(1, 1)
+     if (.not. is_init) then
+        call plend1()
+     else
+        is_init = .true.
+     endif
+
+     call plsdev(trim(pldev))
+     call plsfnam(trim(filename))         ! Set output file name
+     call do_pgpap()
+     call plinit()
+     call plbop()
+  else
+     call plmkstrm(cur_stream)
+     call plsetopt("db", "")
+     call plstart(trim(pldev), 1, 1)
+     call plbop()
+  endif
+
   !call plscolbg(255,255,255)           ! Set background colour to white
-  
-  call plstart(trim(pldev),1,1)        ! Initialise plplot with pldev with 1x1 subpages
-  call pladv(0)                        ! Advance to first (sub)page
-  
-  pgopen = 1
-  
+  call plfontld(1)                     ! Load extended character set(?)
+  call plspause(.false.)                ! Pause at plend()
+  pgopen = cur_stream + 1
 end function pgopen
 !***********************************************************************************************************************************
 
@@ -861,50 +866,34 @@ end function pgopen
 !! \param pgdev  PGplot device
 !! \param nx     Number of frames in the x-direction
 !! \param ny     Number of frames in the y-direction
+!! 
+!! This is a bit simplier since I don't need to create a new stream
+!! for each request.
 
 subroutine pgbegin(i,pgdev,nx,ny)
-  use plplot, only: plspause, plstart, plsfnam
-  
+  use plplot, only: plspause, plstart, plsfnam, plsetopt
   implicit none
   integer, intent(in) :: i,nx,ny
   character, intent(in) :: pgdev*(*)
-  integer :: i1
+  integer :: i1, check_error
   character :: pldev*(99),filename*(99)
   
   i1=i !Is ignored by pgbegin, can't be self, since calling argument is likely a constant
   i1 = i1
-  
-  !Need to convert pgdev -> pldev + filename as in pgbegin()
-  !pldev = trim(pgdev)
-  !!pldev = 'xwin'
-  !
-  !!pldev = 'xwin'
-  !!pldev = 'wxwidgets'
-  !!pldev = 'xcairo'
-  !!pldev = 'qtwidget'
-  !
-  !pldev = 'png'       ! No anti-aliasing in lines
-  !!pldev = 'wxpng'     ! No extended characters
-  !!pldev = 'pngcairo'
-  !!pldev = 'pngqt'
-  
-  filename = 'plot_temp.png'
-  
-  
-  
   call pg2pldev(pgdev, pldev,filename)
-  
-  !write(0,'(A)')'pgbegin: '//trim(pgdev)//' - '//trim(pldev)//' - '//trim(filename)
-  
-  call plsfnam(trim(filename))         ! Set output file name
+  if(trim(pldev).ne.'xwin') then
+     if (check_error(trim(filename)).ne. 0) then
+        return
+     endif
+     call plsfnam(trim(filename))         ! Set output file name
+     call do_pgpap()
+  else
+     call plsetopt("db", "")
+  endif
   call plfontld(1)                     ! Load extended character set(?)
-  call plspause(.true.)                ! Pause at pgend()
-  !call plscolbg(255,255,255)           ! Set background colour to white
-  
-  call plstart(trim(pldev),nx,ny)
-  call pladv(0)  
-  call plspause(.false.)
-  
+  call plstart(trim(pldev), nx, ny)
+  call plbop()
+  call plspause(.false.)                ! Pause at plend()
 end subroutine pgbegin
 !***********************************************************************************************************************************
 
@@ -914,8 +903,9 @@ end subroutine pgbegin
 
 subroutine pgend()
   implicit none
-  
-  call plend()
+  call plflush()
+  call pleop()
+  call plend1()
   
 end subroutine pgend
 !***********************************************************************************************************************************
@@ -928,23 +918,32 @@ end subroutine pgend
 !! \param ratio  Paper aspect ratio
 
 subroutine pgpap(width,ratio)
-  use plplot, only: plflt
-  
+  use PG2PLplot, only: set_paper, paper_width, paper_ratio
   implicit none
-  real, intent(in) :: width,ratio
+  real, intent(in) :: width, ratio
+  set_paper = .true.
+  paper_width = width
+  paper_ratio = ratio
+end subroutine pgpap
+
+subroutine do_pgpap()
+  use PG2PLplot, only: set_paper, paper_width, paper_ratio
+  use plplot, only : plflt
+  implicit none
   integer :: xlen,ylen,xoff,yoff
   real(kind=plflt) :: xp,yp
-  
+  if (.not. set_paper) then
+     return
+  endif
+  set_paper = .false.
   xp = 300.  !DPI
-  yp = 300.  
-  xlen = nint(width*xp)
-  ylen = nint(width*xp*ratio)
+  yp = 300.
+  xlen = nint(paper_width*xp)
+  ylen = nint(paper_width*xp*paper_ratio)
   xoff = 0  !Offset
   yoff = 0
-  
   call plspage(xp,yp,xlen,ylen,xoff,yoff)  ! Must be called before plinit()!
-  
-end subroutine pgpap
+end subroutine do_pgpap
 !***********************************************************************************************************************************
 
 
@@ -953,8 +952,8 @@ end subroutine pgpap
 !!
 !! \param xl1  Left side of the x-axis
 !! \param xr1  Right side of the x-axis
-!! \param yl1  Left side of the y-axis
-!! \param yr1  Right side of the y-axis
+!! \param yb1  Bottom side of the y-axis
+!! \param yt1  Top side of the y-axis
 
 
 subroutine pgsvp(xl1,xr1,yb1,yt1)
@@ -1024,27 +1023,24 @@ end subroutine pgsubp
 
 subroutine pgpage()
   implicit none
-  
   call pladv(0)
   
 end subroutine pgpage
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  Start buffering output - dummy routine
+!> \brief  Start buffering output
 
 subroutine pgbbuf()
   implicit none
-  
 end subroutine pgbbuf
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  End buffering output - dummy routine
+!> \brief  End buffering output
 
 subroutine pgebuf()
   implicit none
-  
 end subroutine pgebuf
 !***********************************************************************************************************************************
 
@@ -1082,109 +1078,43 @@ end subroutine pgbox
 
 
 !***********************************************************************************************************************************
-!> \brief  Draw a single tick mark, optionally with label - no PLplot routine found
+!> \brief  Draw a single tick mark - no PLplot routine found
 !!
 !! \param x1      world coordinates of one endpoint of the axis
 !! \param y1      world coordinates of one endpoint of the axis
 !! \param x2      world coordinates of the other endpoint of the axis
 !! \param y2      world coordinates of the other endpoint of the axis
-!!
-!! \param pos     draw the tick mark at fraction pos (0<=pos<=1) along the line from (X1,Y1) to (X2,Y2)
-!! \param tikl    length of tick mark drawn to the left or bottom of the axis - drawing ticks outside the box may not be supported
-!! \param tikr    length of major tick marks drawn to the right or top of the axis - drawing outside the box may not be supported
-!!
-!! \param disp    displacement of label text from the axis
+!! \param v       draw the tick mark at fraction V (0<=V<=1) along the line from (X1,Y1) to (X2,Y2)
+!! \param tikl    length of tick mark drawn to left of axis
+!! \param tikr    length of major tick marks drawn to right of axis
+!! \param disp    displacement of label text to right of axis
 !! \param orient  orientation of label text, in degrees
-!! \param lbl     text of label (may be blank)
+!! \param str     text of label (may be blank)
 
-subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
-  use plplot, only: plflt
-  
+subroutine pgtick(x1, y1, x2, y2, v, tikl, tikr, disp, orient, str)
   implicit none
-  real, intent(in) :: x1, y1, x2, y2, pos, tikl, tikr, disp, orient
-  character, intent(in) :: lbl*(*)
+  real, intent(in) :: x1, y1, x2, y2, v, tikl, tikr, disp, orient
+  character, intent(in) :: str*(*)
   
-  real :: x,y,dx,dy, dpx,dpy, reldiff
-  real(plflt) :: p_xmin,p_xmax,p_ymin,p_ymax, plx1,plx2,ply1,ply2, tlen, disp1,pos1,just
-  character :: lbl1*(len(lbl))
+  integer, save :: warn
+  real :: x
+  character :: str1*(len(str))
   
-  disp1 = disp
-  x = orient  ! Unused
-  x = x       ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
-  lbl1 = lbl
+  x = x1
+  x = x2
+  x = y1
+  x = y2
+  x = v
+  x = tikl
+  x = tikr
+  x = disp
+  x = orient
+  x = x  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
+  str1 = str
+  str1 = str1  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
   
-  dx = x2 - x1
-  dy = y2 - y1
-  x  = x1 + pos*dx
-  y  = y1 + pos*dy
-  
-  call plgvpw(p_xmin, p_xmax, p_ymin, p_ymax)
-  
-  dpx = real(abs(p_xmax-p_xmin))
-  dpy = real(abs(p_ymax-p_ymin))
-  
-  
-  tlen = 0.03  ! default size of a tickmark
-  pos1 = pos
-  just = 0.5
-  
-  if(reldiff(y1,y2) .le. epsilon(y1)*10 .or. (y1.eq.0.0 .and. y2.eq.0.0)) then                  ! Want horizontal axis
-     
-     plx1 = x
-     plx2 = x
-     ply1 = y
-     
-     ! Plot ticks below the axis:
-     if(tikl.gt.tiny(tikl)) then
-        ply2 = y - dpy * tikl * tlen
-        call pljoin(plx1,ply1,plx2,ply2)
-     end if
-     
-     ! Plot ticks above the axis:
-     if(tikr.gt.tiny(tikr)) then
-        ply2 = y + dpy * tikr * tlen
-        call pljoin(plx1,ply1,plx2,ply2)
-     end if
-     
-     ! Print labels:
-     if(abs(reldiff(y,real(p_ymin))) .le. epsilon(y)*10 .or. (y.eq.0.0 .and. p_ymin.eq.0.0)) then
-        call plmtex('B', disp1, pos1, just, trim(lbl1))                                         ! Print label below the bottom axis
-     else
-        call plmtex('T', disp1, pos1, just, trim(lbl1))                                         ! Print label above the top axis
-     end if
-     
-  else if(reldiff(x1,x2) .le. epsilon(x1)*10 .or. (x1.eq.0.0 .and. x2.eq.0.0)) then             ! Want vertical axis
-     
-     ply1 = y
-     ply2 = y
-     plx1 = x
-     
-     ! Plot ticks to the left of the axis:
-     if(tikl.gt.tiny(tikl)) then
-        plx2 = x - dpx * tikl * tlen
-        call pljoin(plx1,ply1, plx2,ply2)
-     end if
-          
-     ! Plot ticks to the right of the axis:
-     if(tikr.gt.tiny(tikr)) then
-        plx2 = x + dpx * tikr * tlen
-        call pljoin(plx1,ply1, plx2,ply2)
-     end if
-     
-     ! Print labels:
-     if(abs(reldiff(x,real(p_xmin))) .le. epsilon(x)*10 .or. (x.eq.0.0 .and. p_xmin.eq.0.0)) then
-        call plmtex('L', disp1, pos1, just, trim(lbl1))                           ! Print label to the left of the left-hand axis
-     else
-        call plmtex('R', disp1, pos1, just, trim(lbl1))                           ! Print label to the right of the right-hand axis
-     end if
-     
-  else
-     write(0, '(A)') "PG2PLplot, pgtick(): x1!=x2 and y1!=y2 - I don't know which axis you want to use..."
-     print*,'x:',x1,x2,reldiff(x1,x2)
-     print*,'y:',y1,y2,reldiff(y1,y2)
-  end if
-  
-  
+  if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgtick()  ***'
+  warn = 123
   
 end subroutine pgtick
 !***********************************************************************************************************************************
@@ -1197,8 +1127,6 @@ end subroutine pgtick
 !! \todo No plplot routine found yet - using dummy
 
 subroutine pgolin(maxpt, npt, x, y, symbol)
-  use PG2PLplot, only: compatibility_warnings
-  
   implicit none
   integer, intent(in) :: maxpt,symbol
   integer, intent(out) :: npt
@@ -1213,12 +1141,20 @@ subroutine pgolin(maxpt, npt, x, y, symbol)
   symbol1 = symbol
   symbol1 = symbol1  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
   
-  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgolin()  ***'
   warn = 123
   
 end subroutine pgolin
 !***********************************************************************************************************************************
+subroutine pgeras()
+  use plplot, only: plclear
+  implicit none
+  call plclear()
+end subroutine pgeras
+
+!***********************************************************************************************************************************
+!> \brief  Erase screen
+
 
 
 !***********************************************************************************************************************************
@@ -1270,8 +1206,10 @@ subroutine pg2pldev(pgdev, pldev,filename)
   ! Change PGplot ppm output tot png:
   call replace_substring(pldev,'ppm','png')
   call replace_substring(filename,'ppm','png')
-  
-  !call replace_substring(pldev,'png','pngqt')
+  if (trim(pldev).eq.'png') then
+     pldev = 'pngcairo' ! use pngcairo if png since it I get segfaults
+     ! if outputing to both X11 and png which pulls in pngqt
+  endif
   !write(0,'(A)')trim(pgdev)//' - '//trim(pldev)//' - '//trim(filename)
   
   !stop
@@ -1301,33 +1239,180 @@ subroutine replace_substring(string, str_in, str_out)
   end do
   
 end subroutine replace_substring
-!***********************************************************************************************************************************
-
 
 !***********************************************************************************************************************************
-!> \brief  Return the relative difference between two numbers: dx/\<x\>  -  taken from libSUFR, turned into single precision
+!> \brief  Select output stream
 !!
-!! \param x1  First number
-!! \param x2  Second number
+!! \param  pgdev stream number
 
-function reldiff(x1,x2)
-  implicit none
-  real, intent(in) :: x1,x2
-  real :: reldiff, xsum,xdiff
-  
-  xsum  = x1+x2
-  xdiff = x2-x1
-  if(abs(xsum).gt.tiny(xsum)) then
-     reldiff = xdiff / (xsum*0.5)
-  else                     ! Can't divide by zero
-     if(abs(xdiff).gt.tiny(xdiff)) then
-        reldiff = xdiff
-     else
-        reldiff = 1.0  ! 0/0
-     end if
-  end if
-  
-end function reldiff
+subroutine pgslct(pgdev)
+  integer, intent(in) :: pgdev
+  integer cur_stream
+  call plgstrm(cur_stream)
+  ! Note I call pleop only for XWin stream
+  ! which are buffered.  For all other streams
+  ! I don't want to end the page
+  if (cur_stream .ne. 0) then
+     call pleop()
+  endif
+  call plsstrm(pgdev-1)
+end subroutine pgslct
+
 !***********************************************************************************************************************************
+!> \brief  Save parameters
 
-  
+subroutine pgsave()
+  use PG2PLplot, only: save_level, max_level
+  use PG2PLplot, only: save_ffamily, save_fstyle, save_fweight
+  use PG2PLplot, only: save_lwidth
+  use plplot, only : plgfont
+  implicit none
+
+  save_level = save_level + 1
+  if (save_level .ge. max_level) then
+     write(0,'(/,A,/)') '***  PG2PLplot WARNING: too many save calls'
+     return
+  endif
+  call plgfont(save_ffamily(save_level), save_fstyle(save_level), &
+     & save_fweight(save_level))
+  call pgqlw(save_lwidth(save_level))
+end subroutine pgsave
+
+!***********************************************************************************************************************************
+!> \brief  Unsave parameters
+
+subroutine pgunsa()
+  use PG2PLplot, only: save_level, max_level
+  use PG2PLplot, only: save_ffamily, save_fstyle, save_fweight
+  use PG2PLplot, only: save_lwidth
+  use plplot, only : plsfont
+  implicit none
+  if (save_level .eq. 0) then
+     write(0,'(/,A,/)') '***  PG2PLplot WARNING: no save call in stack'
+     return
+  endif
+  save_level = save_level - 1
+  if (save_level .ge. max_level) then
+     write(0,'(/,A,/)') '***  PG2PLplot WARNING: unsave greater than stack'
+     return
+  endif
+  call plsfont(save_ffamily(save_level), save_fstyle(save_level), &
+     & save_fweight(save_level))
+  call pgslw(save_lwidth(save_level))
+end subroutine pgunsa
+
+!***********************************************************************************************************************************
+!> \brief  Move to location
+
+subroutine pgmove(x, y)
+  use PG2PLplot, only: xcur, ycur
+  implicit none
+  real, intent(in) :: x, y
+
+  xcur = x
+  ycur = y
+end subroutine pgmove
+
+!***********************************************************************************************************************************
+!> \brief  Draw line to location
+
+subroutine pgdraw(x, y)
+  use PG2PLplot, only: xcur, ycur
+  use plplot, only: pljoin, plflt
+  implicit none
+  real, intent(in) :: x, y
+  real(plflt) :: x1, y1
+  x1 = x
+  y1 = y
+  call pljoin(xcur, ycur, x1, y1)
+  call pgmove(x, y)
+end subroutine pgdraw
+
+!***********************************************************************************************************************************
+!> \brief  Draw point
+
+subroutine pgpt(n, x, y, ncode)
+  use plplot, only: plpoin, plflt, plstring
+  implicit none
+  integer, intent(in) :: n, ncode
+  real(plflt), intent(in), dimension(n) :: x, y
+  integer code
+  character(len=1024) code_string
+  if (ncode == -3) then
+     code = 7
+  elseif (ncode == -4) then
+     code = 6
+  elseif (ncode < 0) then
+     code = 22
+  else
+     code = ncode
+  endif
+  if (code <= 127) then
+     call plpoin(x, y, code)
+  else
+     write (code_string, "(i10)") code
+     code_string = '#(' // trim(adjustl(code_string)) // ')'
+     call plstring(x, y, code_string)
+  endif    
+end subroutine pgpt
+
+!***********************************************************************************************************************************
+!> \brief  Draw point
+
+subroutine pgpt1(x, y, ncode)
+  use plplot, only: plpoin, plflt
+  implicit none
+  integer, intent(in) :: ncode
+  real(plflt), intent(in) :: x, y
+  real(plflt), dimension(1) :: xin, yin
+  xin(1) = x
+  yin(1) = y
+  call pgpt(1, xin, yin, ncode)
+end subroutine pgpt1
+
+!***********************************************************************************************************************************
+!> \brief  Close stream
+
+subroutine pgclos()
+  implicit none
+  call pleop()
+end subroutine pgclos
+
+!***********************************************************************************************************************************
+!> \brief  Get cursor location
+
+subroutine pgband(mode, posn, xref, yref, x, y, ch)
+  integer, intent(in) :: mode, posn
+  real, intent(in) :: xref, yref
+  real, intent(out) :: x, y
+  character*(*), intent(out) :: ch
+  integer :: i1
+  real :: r1
+
+  i1 = mode
+  i1 = posn
+  r1 = xref
+  r1 = yref
+  x = 0.0
+  y = 0.0
+  ch = CHAR(0)
+end subroutine pgband
+
+!***********************************************************************************************************************************
+!> \brief  Get color range
+
+subroutine pgqcol(c1, c2)
+  integer, intent(out) :: c1, c2
+  c1 = 0
+  c2 = 255
+end subroutine pgqcol
+
+!***********************************************************************************************************************************
+!> \brief  Get current color index
+
+subroutine pgqci(ci)
+  integer, intent(out):: ci
+  ci = 0
+end subroutine pgqci
+
+
