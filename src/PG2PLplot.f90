@@ -920,7 +920,7 @@ end subroutine pgend
 subroutine pgpap(width,ratio)
   use PG2PLplot, only: set_paper, paper_width, paper_ratio
   implicit none
-  integer, intent(in) :: width, ratio
+  real, intent(in) :: width, ratio
   set_paper = .true.
   paper_width = width
   paper_ratio = ratio
