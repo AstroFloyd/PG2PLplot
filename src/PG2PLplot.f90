@@ -1267,6 +1267,11 @@ subroutine pg2pldev(pgdev, pldev,filename)
   pldev = ' '
   pldev = pgdev(i+1:)
   
+  ! Change PGPlot ps to PLplot ps:
+  call replace_substring(pldev,'vcps','psc')
+  call replace_substring(pldev,'cps','psc')
+  call replace_substring(pldev,'vps','ps')
+  
   ! Change PGplot ppm output tot png:
   call replace_substring(pldev,'ppm','png')
   call replace_substring(filename,'ppm','png')
