@@ -702,11 +702,11 @@ end subroutine pgptxt
 !***********************************************************************************************************************************
 !> \brief  Non-standard alias for pgptxt()
 !!
-!! \param x1     X-coordinate of text
-!! \param y1     Y-coordinate of text
-!! \param ang    Angle
-!! \param just1  Justification
-!! \param text   Text to print
+!! \param x     X-coordinate of text
+!! \param y     Y-coordinate of text
+!! \param ang   Angle
+!! \param just  Justification
+!! \param text  Text to print
 !!
 !! \note  Angle only right for 0,90,180,270deg or square viewport
 
