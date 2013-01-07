@@ -3,7 +3,7 @@
 ! 
 ! LICENCE:
 ! 
-! Copyright 2010-2012 Marc van der Sluys
+! Copyright 2010-2013 Marc van der Sluys, joequant
 !  
 ! This file is part of the PG2PLplot package.
 !  
@@ -1390,17 +1390,22 @@ subroutine pgband(mode, posn, xref, yref, x, y, ch)
   integer, intent(in) :: mode, posn
   real, intent(in) :: xref, yref
   real, intent(out) :: x, y
-  character*(*), intent(out) :: ch
+  character, intent(out) :: ch*(*)
   integer :: i1
   real :: r1
-
+  
   i1 = mode
   i1 = posn
+  i1 = i1  ! Remove 'unused variable error from g95'
+  
   r1 = xref
   r1 = yref
+  r1 = r1  ! Remove 'unused variable error from g95'
+  
   x = 0.0
   y = 0.0
   ch = CHAR(0)
+  
 end subroutine pgband
 
 !***********************************************************************************************************************************
