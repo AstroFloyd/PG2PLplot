@@ -669,14 +669,13 @@ subroutine pgptxt(x1,y1,ang,just1,text)
   ! Convert angle -> dy/dx
   dx = (xmax-xmin)*0.1
   
-  if (abs(ang).lt.1.e-5) then            ! ang ~ 0 deg
+  if(abs(ang).lt.1.e-5) then                       ! ang ~ 0 deg
      dy =  0.0
   else if(abs(mod(ang-90.,180.)).lt.1.e-5) then    ! ang = +/-90deg
-     dx = 0.
-     dy = -1.                                      ! ang = -90deg
+     dx =  0.0
+     dy = -1.0                                     ! ang = -90deg
      if(abs(mod(ang-90.,360.)).lt.1.e-5) dy = 1.   ! ang = +90deg
   else
-     !dy = dx*tan(ang*d2r) * (ymax-ymin) !/(xmax-xmin)
      dx = 1.0
      dy = dx*tan(ang*d2r) * (ymax-ymin)/(xmax-xmin)
      if(ang.gt.90. .and. ang.lt.270.  .or. ang.lt.-90. .and. ang.gt.-270.) then
@@ -816,39 +815,43 @@ end subroutine pgmtext
 !!
 !! \param pgdev  PGplot device
 !!
-!! This function creates a new stream for each xwin request, but uses
-!! the same stream (0) for each file stream request.  Xwin streams are
-!! treated differently since we want bufferring for smooth animations
-!! whereas the other streams are non-buffered.
+!! This function creates a new stream for each xwin request, but uses the same stream (0) for each file stream request.
+!! Xwin streams are treated differently, since we want bufferring for smooth animations whereas the other streams are non-buffered.
 
 function pgopen(pgdev)
   use plplot, only: plspause, plstart, plsfnam, plsdev
   use plplot, only: plmkstrm, plsetopt
+  
   implicit none
   integer :: pgopen
-  integer :: cur_stream, check_error
   character, intent(in) :: pgdev*(*)
+  
+  integer :: cur_stream, check_error
   character :: pldev*(99),filename*(99)
   logical :: is_init = .false.
+  
   filename = 'plot_temp.png'
-  call pg2pldev(pgdev, pldev,filename)
+  
+  call pg2pldev(pgdev, pldev,filename)  ! Extract pldev and filename from pgdev
   
   if(trim(pldev).ne.'xwin') then
      if (check_error(trim(filename)).ne. 0) then
         pgopen = -1
         return
      end if
+     
      cur_stream = 0
+     
      call plsstrm(0)
      call plssub(1, 1)
-     if (.not. is_init) then
+     if(.not. is_init) then
         call plend1()
      else
         is_init = .true.
      end if
      
      call plsdev(trim(pldev))
-     call plsfnam(trim(filename))         ! Set output file name
+     call plsfnam(trim(filename))       ! Set output file name
      call do_pgpap()
      call plinit()
      call plbop()
@@ -860,9 +863,11 @@ function pgopen(pgdev)
   end if
   
   !call plscolbg(255,255,255)           ! Set background colour to white
-  call plfontld(1)                     ! Load extended character set(?)
+  call plfontld(1)                      ! Load extended character set(?)
   call plspause(.false.)                ! Pause at plend()
+  
   pgopen = cur_stream + 1
+  
 end function pgopen
 !***********************************************************************************************************************************
 
@@ -875,33 +880,35 @@ end function pgopen
 !! \param nx     Number of frames in the x-direction
 !! \param ny     Number of frames in the y-direction
 !! 
-!! This is a bit simplier since I don't need to create a new stream
-!! for each request.
+!! This is a bit simpler than pgopen(), since I don't need to create a new stream for each request.
 
 subroutine pgbegin(i,pgdev,nx,ny)
   use plplot, only: plspause, plstart, plsfnam, plsetopt
+  
   implicit none
   integer, intent(in) :: i,nx,ny
   character, intent(in) :: pgdev*(*)
   integer :: i1, check_error
   character :: pldev*(99),filename*(99)
   
-  i1=i !Is ignored by pgbegin, can't be self, since calling argument is likely a constant
+  i1 = i   ! Is ignored by pgbegin, can't be self, since calling argument is likely a constant
   i1 = i1
-  call pg2pldev(pgdev, pldev,filename)
+  
+  call pg2pldev(pgdev, pldev,filename)  ! Extract pldev and filename from pgdev
+  
   if(trim(pldev).ne.'xwin') then
-     if (check_error(trim(filename)).ne. 0) then
-        return
-     end if
-     call plsfnam(trim(filename))         ! Set output file name
+     if(check_error(trim(filename)).ne.0) return
+     call plsfnam(trim(filename))       ! Set output file name
      call do_pgpap()
   else
      call plsetopt("db", "")
   end if
-  call plfontld(1)                     ! Load extended character set(?)
+  
+  call plfontld(1)                      ! Load extended character set(?)
   call plstart(trim(pldev), nx, ny)
   call plbop()
   call plspause(.false.)                ! Pause at plend()
+  
 end subroutine pgbegin
 !***********************************************************************************************************************************
 
@@ -911,6 +918,7 @@ end subroutine pgbegin
 
 subroutine pgend()
   implicit none
+  
   call plflush()
   call pleop()
   call plend1()
@@ -929,28 +937,37 @@ subroutine pgpap(width,ratio)
   use PG2PLplot, only: set_paper, paper_width, paper_ratio
   implicit none
   real, intent(in) :: width, ratio
+  
   set_paper = .true.
   paper_width = width
   paper_ratio = ratio
+  
 end subroutine pgpap
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine do_pgpap()
   use PG2PLplot, only: set_paper, paper_width, paper_ratio
   use plplot, only : plflt
   implicit none
   integer :: xlen,ylen,xoff,yoff
   real(kind=plflt) :: xp,yp
-  if (.not. set_paper) then
-     return
-  end if
+  
+  if(.not. set_paper) return
+  
   set_paper = .false.
-  xp = 300.  !DPI
+  
+  xp = 300.  ! DPI
   yp = 300.
+  
   xlen = nint(paper_width*xp)
   ylen = nint(paper_width*xp*paper_ratio)
-  xoff = 0  !Offset
+  
+  xoff = 0  ! Offset
   yoff = 0
+  
   call plspage(xp,yp,xlen,ylen,xoff,yoff)  ! Must be called before plinit()!
+  
 end subroutine do_pgpap
 !***********************************************************************************************************************************
 
@@ -960,9 +977,8 @@ end subroutine do_pgpap
 !!
 !! \param xl1  Left side of the x-axis
 !! \param xr1  Right side of the x-axis
-!! \param yl1  Left side of the y-axis
-!! \param yr1  Right side of the y-axis
-
+!! \param yb1  Bottom side of the y-axis
+!! \param yt1  Top side of the y-axis
 
 subroutine pgsvp(xl1,xr1,yb1,yt1)
   use plplot, only: plflt
@@ -1037,18 +1053,32 @@ end subroutine pgpage
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  Start buffering output
+!> \brief  Start buffering output - dummy routine!
 
 subroutine pgbbuf()
+  use PG2PLplot, only: compatibility_warnings
   implicit none
+  integer, save :: warn
+  
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
+  if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgbbuf()  ***'
+  warn = 123
+  
 end subroutine pgbbuf
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  End buffering output
+!> \brief  End buffering output - dummy routine!
 
 subroutine pgebuf()
+  use PG2PLplot, only: compatibility_warnings
   implicit none
+  integer, save :: warn
+  
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
+  if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgebuf()  ***'
+  warn = 123
+  
 end subroutine pgebuf
 !***********************************************************************************************************************************
 
@@ -1086,7 +1116,7 @@ end subroutine pgbox
 
 
 !***********************************************************************************************************************************
-!> \brief  Draw a single tick mark, optionally with label - no PLplot routine found
+!> \brief  Draw a single tick mark, optionally with label - no PLplot routine found, using an ad-hoc routine
 !!
 !! \param x1      world coordinates of one endpoint of the axis
 !! \param y1      world coordinates of one endpoint of the axis
@@ -1188,8 +1218,6 @@ subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
      print*,'y:',y1,y2,reldiff(y1,y2)
   end if
   
-  
-  
 end subroutine pgtick
 !***********************************************************************************************************************************
 
@@ -1264,6 +1292,19 @@ end subroutine pg2pltext
 !! \param  pgdev     PGplot device ID (includes filename: 'file.name/dev')
 !! \retval pldev     PLplot device ID ('dev')
 !! \retval filename  PLplot file name ('file.name')
+!!
+!!
+!! \note Possible values for pldev:
+!!  - xwin:      
+!!  - wxwidgets: 
+!!  - xcairo:    
+!!  - qtwidget:  
+!!
+!!  - png:       no anti-aliasing in lines
+!!  - wxpng:     no extended characters
+!!  - pngcairo:  
+!!  - pngqt:     
+
 
 subroutine pg2pldev(pgdev, pldev,filename)
   implicit none
@@ -1282,6 +1323,7 @@ subroutine pg2pldev(pgdev, pldev,filename)
   
   ! Change PGPlot ps to PLplot ps:
   call replace_substring(pldev,'vcps','psc')
+  call replace_substring(pldev,'cvps','psc')
   call replace_substring(pldev,'cps','psc')
   call replace_substring(pldev,'vps','ps')
   
@@ -1289,15 +1331,11 @@ subroutine pg2pldev(pgdev, pldev,filename)
   call replace_substring(pldev,'ppm','png')
   call replace_substring(filename,'ppm','png')
   
+  ! Use pngqt rather than png:
   !call replace_substring(pldev,'png','pngqt')
   
-  if (trim(pldev).eq.'png') then
-     pldev = 'pngcairo' ! use pngcairo if png since it I get segfaults
-     ! if outputing to both X11 and png which pulls in pngqt
-  end if
-  !write(0,'(A)')trim(pgdev)//' - '//trim(pldev)//' - '//trim(filename)
-  
-  !stop
+  ! Use pngcairo rather than png, since I get segfaults if outputing to both X11 and png which pulls in pngqt (joequant):
+  call replace_substring(pldev,'png','pngcairo')
   
 end subroutine pg2pldev
 !***********************************************************************************************************************************
@@ -1314,8 +1352,7 @@ subroutine pgslct(pgdev)
   
   call plgstrm(cur_stream)
   
-  ! Note: I call pleop only for XWin stream which are buffered.
-  ! For all other streams I don't want to end the page.
+  ! Note: I call pleop only for XWin stream which are buffered.  For all other streams I don't want to end the page.
   if(cur_stream.ne.0) call pleop()
   
   call plsstrm(pgdev-1)
@@ -1377,7 +1414,7 @@ end subroutine pgunsa
 
 
 !***********************************************************************************************************************************
-!> \brief  Move to location - for use with pgdraw() only!
+!> \brief  Move pen to location - for use with pgdraw() only!
 
 subroutine pgmove(x, y)
   use PG2PLplot, only: xcur, ycur
@@ -1516,7 +1553,7 @@ end subroutine pgband
 
 
 !***********************************************************************************************************************************
-!> \brief  Get color range - dummy routine!
+!> \brief  Get colour range - dummy routine!
 
 subroutine pgqcol(c1, c2)
   use PG2PLplot, only: compatibility_warnings
@@ -1540,7 +1577,7 @@ end subroutine pgqcol
 
 
 !***********************************************************************************************************************************
-!> \brief  Get current color index - dummy routine!
+!> \brief  Get current colour index - dummy routine!
 
 subroutine pgqci(ci)
   use PG2PLplot, only: compatibility_warnings
