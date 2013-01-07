@@ -1,8 +1,6 @@
 PG2PLplot
 
-PG2PLplot is a library intended to help the transition from Fortran code linked against
-PGPlot, to linking it against PLplot.  The library contains pgplot-to-plplot bindings
-to enable calling PLplot using PGplot commands.
+PG2PLplot is a library intended to help the transition from Fortran code linked against PGPlot, to linking it against PLplot.  The library contains pgplot-to-plplot bindings to enable calling PLplot using PGplot commands.
 
 See:
 http://pg2plplot.sourceforge.net/
