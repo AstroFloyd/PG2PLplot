@@ -737,7 +737,7 @@ subroutine pgtext(x1,y1,text)
   real(kind=plflt) :: x2,y2,just,dx,dy
   character :: text1*(len(text))
   
-  !Convert angle=0deg -> dy/dx
+  ! Convert angle=0deg -> dy/dx
   dx = 1.
   dy = 0.
   just = 0.  !Left-adjusted
