@@ -1335,8 +1335,9 @@ subroutine pg2pldev(pgdev, pldev,filename)
   !call replace_substring(pldev,'png','pngqt')
   
   ! Use pngcairo rather than png, since I get segfaults if outputing to both X11 and png which pulls in pngqt (joequant):
-  call replace_substring(pldev,'png','pngcairo')
-  
+  if (pldev .eq. 'png') then
+      pldev = 'pngcairo'
+  end if
 end subroutine pg2pldev
 !***********************************************************************************************************************************
 
