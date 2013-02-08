@@ -1132,7 +1132,7 @@ end subroutine pgbox
 !! \param lbl     text of label (may be blank)
 
 subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
-  use plplot, only: plflt
+  use plplot, only: plflt, plmtex
   
   implicit none
   real, intent(in) :: x1, y1, x2, y2, pos, tikl, tikr, disp, orient
