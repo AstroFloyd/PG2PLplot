@@ -1472,16 +1472,9 @@ subroutine pgpt(n, x, y, ncode)
   else
      code = ncode
   end if
-  
-  if(code <= 127) then
-     call plpoin(x, y, code)
-  else
-     write(code_string, '(I10)') code
-     code_string = '#('//trim(adjustl(code_string))//')'
-     call plstring(x, y, code_string)
-  end if
-  
+  call plsym(x, y, code)
 end subroutine pgpt
+
 !***********************************************************************************************************************************
 
 
