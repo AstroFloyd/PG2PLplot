@@ -41,12 +41,23 @@ module PG2PLplot
   integer :: save_fstyle(max_level)
   integer :: save_fweight(max_level)
   integer :: save_lwidth(max_level)
-  integer :: cur_lwidth
-  logical :: set_paper = .false.
+  integer :: save_lstyle(max_level)
+  integer :: save_color(max_level)
+  integer :: cur_lwidth=1, cur_color=1, cur_lstyle=1
+  logical :: is_init = .false.
   real(8) :: paper_width, paper_ratio
-  
+contains
+subroutine do_init()
+  if (.not. is_init) then
+    call plinit()
+    call plbop() 
+    is_init = .true.
+  end if
+end subroutine do_init  
 end module PG2PLplot
+
 !***********************************************************************************************************************************
+
 
 
 !***********************************************************************************************************************************
@@ -55,10 +66,11 @@ end module PG2PLplot
 !! \param ls  Line style
 
 subroutine pgsls(ls)
+  use PG2PLplot, only : cur_lstyle
   implicit none
   integer, intent(in) :: ls
   integer :: ls1,ls2, styles(5)
-  
+  cur_lstyle = ls
   styles = (/1,4,5,2,6/)
   
   ls1 = ls   ! 1: solid, 2: dashes, 3: dash-dotted, 4: dotted, 5: dash-dot-dot-dot
@@ -88,7 +100,6 @@ subroutine pgslw(lw)
   cur_lwidth = lw
   lw1 = max(min(lw,201),1)
   lw2 = lw1 - 1
-  
   call plwid(lw2)
   
   !print*,'pgslw: ',lw,lw1,lw2
@@ -102,18 +113,12 @@ end subroutine pgslw
 !! \param lw  Line width
 
 subroutine pgqlw(lw)
-  use PG2PLplot, only: compatibility_warnings, cur_lwidth
+  use PG2PLplot, only: cur_lwidth
   implicit none
   integer, intent(out) :: lw
-  integer, save :: warn
-  
-  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
-  if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgqlw()  ***'
-  warn = 123
-  
-  lw = max(1,cur_lwidth)
-  
+  lw = max(1,cur_lwidth)  
 end subroutine pgqlw
+
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
@@ -136,10 +141,11 @@ end subroutine pgscf
 !! \param ci1  Colour index
 
 subroutine pgsci(ci1)
+  use PG2PLplot, only: cur_color
   implicit none
   integer, intent(in) :: ci1
   integer :: ci2,colours(0:15)
-  
+  cur_color = ci1
   ci2 = 15  ! White
   ci2 = ci1
   colours = (/0,15,1,3,9,7,13,2,8,12,4,11,10,5,7,7/)
@@ -821,14 +827,13 @@ end subroutine pgmtext
 function pgopen(pgdev)
   use plplot, only: plspause, plstart, plsfnam, plsdev
   use plplot, only: plmkstrm, plsetopt
-  
+  use PG2PLplot, only : is_init  
   implicit none
   integer :: pgopen
   character, intent(in) :: pgdev*(*)
   
-  integer :: cur_stream, check_error
+  integer :: cur_stream=0, check_error
   character :: pldev*(99),filename*(99)
-  logical :: is_init = .false.
   
   filename = 'plot_temp.png'
   
@@ -840,26 +845,16 @@ function pgopen(pgdev)
         return
      end if
      
-     cur_stream = 0
-     
      call plsstrm(0)
      call plssub(1, 1)
-     if(.not. is_init) then
-        call plend1()
-     else
-        is_init = .true.
-     end if
-     
+     call plend1()
      call plsdev(trim(pldev))
      call plsfnam(trim(filename))       ! Set output file name
-     call do_pgpap()
-     call plinit()
-     call plbop()
   else
      call plmkstrm(cur_stream)
      call plsetopt("db", "")
-     call plstart(trim(pldev), 1, 1)
-     call plbop()
+     call plssub(1, 1)
+     call plsdev(trim(pldev))
   end if
   
   !call plscolbg(255,255,255)           ! Set background colour to white
@@ -867,7 +862,7 @@ function pgopen(pgdev)
   call plspause(.false.)                ! Pause at plend()
   
   pgopen = cur_stream + 1
-  
+  is_init = .false.
 end function pgopen
 !***********************************************************************************************************************************
 
@@ -883,8 +878,8 @@ end function pgopen
 !! This is a bit simpler than pgopen(), since I don't need to create a new stream for each request.
 
 subroutine pgbegin(i,pgdev,nx,ny)
-  use plplot, only: plspause, plstart, plsfnam, plsetopt
-  
+  use plplot, only: plspause, plstart, plsfnam, plsetopt, plssub, plsdev
+  use PG2PLplot, only : is_init
   implicit none
   integer, intent(in) :: i,nx,ny
   character, intent(in) :: pgdev*(*)
@@ -899,16 +894,15 @@ subroutine pgbegin(i,pgdev,nx,ny)
   if(trim(pldev).ne.'xwin') then
      if(check_error(trim(filename)).ne.0) return
      call plsfnam(trim(filename))       ! Set output file name
-     call do_pgpap()
   else
      call plsetopt("db", "")
   end if
   
   call plfontld(1)                      ! Load extended character set(?)
-  call plstart(trim(pldev), nx, ny)
-  call plbop()
+  call plssub(1, 1)
+  call plsdev(trim(pldev))  
+  is_init = .false.
   call plspause(.false.)                ! Pause at plend()
-  
 end subroutine pgbegin
 !***********************************************************************************************************************************
 
@@ -934,31 +928,17 @@ end subroutine pgend
 !! \param ratio  Paper aspect ratio
 
 subroutine pgpap(width,ratio)
-  use PG2PLplot, only: set_paper, paper_width, paper_ratio
-  implicit none
-  real, intent(in) :: width, ratio
-  
-  set_paper = .true.
-  paper_width = width
-  paper_ratio = ratio
-  
-end subroutine pgpap
-!***********************************************************************************************************************************
-
-!***********************************************************************************************************************************
-subroutine do_pgpap()
-  use PG2PLplot, only: set_paper, paper_width, paper_ratio
+  use PG2PLplot, only: paper_width, paper_ratio, do_init
   use plplot, only : plflt
   implicit none
+  real, intent(in) :: width, ratio
   integer :: xlen,ylen,xoff,yoff
   real(kind=plflt) :: xp,yp
   
-  if(.not. set_paper) return
-  
-  set_paper = .false.
-  
   xp = 300.  ! DPI
   yp = 300.
+  paper_width = width
+  paper_ratio = ratio
   
   xlen = nint(paper_width*xp)
   ylen = nint(paper_width*xp*paper_ratio)
@@ -967,8 +947,8 @@ subroutine do_pgpap()
   yoff = 0
   
   call plspage(xp,yp,xlen,ylen,xoff,yoff)  ! Must be called before plinit()!
-  
-end subroutine do_pgpap
+  call do_init()
+end subroutine pgpap
 !***********************************************************************************************************************************
 
 
@@ -1046,9 +1026,10 @@ end subroutine pgsubp
 !> \brief  Advance to the next (sub-)page
 
 subroutine pgpage()
+  use PG2PLplot, only: compatibility_warnings, do_init
   implicit none
   call pladv(0)
-  
+  call do_init()
 end subroutine pgpage
 !***********************************************************************************************************************************
 
@@ -1056,10 +1037,10 @@ end subroutine pgpage
 !> \brief  Start buffering output - dummy routine!
 
 subroutine pgbbuf()
-  use PG2PLplot, only: compatibility_warnings
+  use PG2PLplot, only: compatibility_warnings, do_init
   implicit none
   integer, save :: warn
-  
+  call do_init()
   if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgbbuf()  ***'
   warn = 123
@@ -1348,6 +1329,7 @@ end subroutine pg2pldev
 !! \param  pgdev stream number
 
 subroutine pgslct(pgdev)
+  use plplot, only : plspause
   integer, intent(in) :: pgdev
   integer :: cur_stream
   
@@ -1355,9 +1337,7 @@ subroutine pgslct(pgdev)
   
   ! Note: I call pleop only for XWin stream which are buffered.  For all other streams I don't want to end the page.
   if(cur_stream.ne.0) call pleop()
-  
   call plsstrm(pgdev-1)
-  
 end subroutine pgslct
 !***********************************************************************************************************************************
 
@@ -1366,21 +1346,23 @@ end subroutine pgslct
 !> \brief  Save parameters
 
 subroutine pgsave()
-  use PG2PLplot, only: save_level, max_level
+  use PG2PLplot, only: save_level, max_level, cur_color
   use PG2PLplot, only: save_ffamily, save_fstyle, save_fweight
-  use PG2PLplot, only: save_lwidth
+  use PG2PLplot, only: save_lwidth, save_color, save_lstyle
+  use PG2PLplot, only: cur_lstyle, cur_lwidth
   use plplot, only : plgfont
   implicit none
   
   save_level = save_level + 1
-  if (save_level.ge.max_level) then
+  if (save_level.gt.max_level) then
      write(0,'(/,A,/)') '***  PG2PLplot WARNING: too many save calls in pgsave()'
      return
   end if
   
   call plgfont(save_ffamily(save_level), save_fstyle(save_level), save_fweight(save_level))
-  call pgqlw(save_lwidth(save_level))
-  
+  save_lwidth(save_level) = cur_lwidth
+  save_color(save_level) = cur_color
+  save_lstyle(save_level) = cur_lstyle
 end subroutine pgsave
 !***********************************************************************************************************************************
 
@@ -1391,7 +1373,7 @@ end subroutine pgsave
 subroutine pgunsa()
   use PG2PLplot, only: save_level, max_level
   use PG2PLplot, only: save_ffamily, save_fstyle, save_fweight
-  use PG2PLplot, only: save_lwidth
+  use PG2PLplot, only: save_lwidth, save_color, save_lstyle
   use plplot, only : plsfont
   implicit none
   
@@ -1400,16 +1382,17 @@ subroutine pgunsa()
      return
   end if
   
-  save_level = save_level - 1
-  
-  if (save_level.ge.max_level) then
+  if (save_level.gt.max_level) then
      write(0,'(/,A,/)') '***  PG2PLplot WARNING: unsave greater than stack in pgunsa()'
+     save_level = save_level - 1
      return
   end if
   
   call plsfont(save_ffamily(save_level), save_fstyle(save_level), save_fweight(save_level))
   call pgslw(save_lwidth(save_level))
-  
+  call pgsci(save_color(save_level))
+  call pgsls(save_lstyle(save_level))
+  save_level = save_level - 1
 end subroutine pgunsa
 !***********************************************************************************************************************************
 
@@ -1453,7 +1436,7 @@ end subroutine pgdraw
 !> \brief  Draw a point
 
 subroutine pgpt(n, x, y, ncode)
-  use plplot, only: plpoin, plflt, plstring
+  use plplot, only: plpoin, plflt, plstring, plsym
   
   implicit none
   integer, intent(in) :: n, ncode
