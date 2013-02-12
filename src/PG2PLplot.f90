@@ -844,7 +844,8 @@ function pgopen(pgdev)
         pgopen = -1
         return
      end if
-     
+     cur_stream = 0
+
      call plsstrm(0)
      call plssub(1, 1)
      call plend1()
@@ -1329,14 +1330,16 @@ end subroutine pg2pldev
 !! \param  pgdev stream number
 
 subroutine pgslct(pgdev)
+  use PG2PLplot, only: do_init
   use plplot, only : plspause
   integer, intent(in) :: pgdev
   integer :: cur_stream
-  
+
   call plgstrm(cur_stream)
   
   ! Note: I call pleop only for XWin stream which are buffered.  For all other streams I don't want to end the page.
   if(cur_stream.ne.0) call pleop()
+  call do_init()
   call plsstrm(pgdev-1)
 end subroutine pgslct
 !***********************************************************************************************************************************
