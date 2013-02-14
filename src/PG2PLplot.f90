@@ -37,6 +37,7 @@ module PG2PLplot
   real(8) :: xcur=0, ycur=0
   integer :: save_level = 0
   integer, parameter :: max_level = 20
+  integer, parameter :: max_open = 100
   integer :: save_ffamily(max_level)
   integer :: save_fstyle(max_level)
   integer :: save_fweight(max_level)
@@ -44,7 +45,7 @@ module PG2PLplot
   integer :: save_lstyle(max_level)
   integer :: save_color(max_level)
   integer :: cur_lwidth=1, cur_color=1, cur_lstyle=1
-  logical :: is_init = .false.
+  logical :: is_init
   real(8) :: paper_width, paper_ratio
 contains
 subroutine do_init()
@@ -838,24 +839,17 @@ function pgopen(pgdev)
   filename = 'plot_temp.png'
   
   call pg2pldev(pgdev, pldev,filename)  ! Extract pldev and filename from pgdev
-  
+  call plmkstrm(cur_stream)  
+  call plssub(1, 1)
+  call plsdev(trim(pldev))
   if(trim(pldev).ne.'xwin') then
      if (check_error(trim(filename)).ne. 0) then
         pgopen = -1
         return
      end if
-     cur_stream = 0
-
-     call plsstrm(0)
-     call plssub(1, 1)
-     call plend1()
-     call plsdev(trim(pldev))
      call plsfnam(trim(filename))       ! Set output file name
   else
-     call plmkstrm(cur_stream)
      call plsetopt("db", "")
-     call plssub(1, 1)
-     call plsdev(trim(pldev))
   end if
   
   !call plscolbg(255,255,255)           ! Set background colour to white
@@ -915,9 +909,7 @@ subroutine pgend()
   implicit none
   
   call plflush()
-  call pleop()
-  call plend1()
-  
+  call plend1()  
 end subroutine pgend
 !***********************************************************************************************************************************
 
@@ -1331,15 +1323,15 @@ end subroutine pg2pldev
 
 subroutine pgslct(pgdev)
   use PG2PLplot, only: do_init
-  use plplot, only : plspause
+  use plplot, only : plspause, plgdev
   integer, intent(in) :: pgdev
   integer :: cur_stream
-
-  call plgstrm(cur_stream)
-  
-  ! Note: I call pleop only for XWin stream which are buffered.  For all other streams I don't want to end the page.
-  if(cur_stream.ne.0) call pleop()
+  character :: pldev*(99)
   call do_init()
+  call plgdev(pldev)
+  if (trim(pldev).eq.'xwin') then
+     call pleop()
+  end if
   call plsstrm(pgdev-1)
 end subroutine pgslct
 !***********************************************************************************************************************************
@@ -1488,9 +1480,7 @@ end subroutine pgpt1
 
 subroutine pgclos()
   implicit none
-  
-  call pleop()
-  
+  call plend1()
 end subroutine pgclos
 !***********************************************************************************************************************************
 
