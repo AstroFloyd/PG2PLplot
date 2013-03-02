@@ -47,16 +47,19 @@ module PG2PLplot
   integer :: cur_lwidth=1, cur_color=1, cur_lstyle=1
   logical :: is_init
   real(8) :: paper_width, paper_ratio
+  
 contains
-subroutine do_init()
-  if (.not. is_init) then
-    call plinit()
-    call plbop() 
-    is_init = .true.
-  end if
-end subroutine do_init  
+  
+  subroutine do_init()
+    implicit none
+    if (.not. is_init) then
+       call plinit()
+       call plbop() 
+       is_init = .true.
+    end if
+  end subroutine do_init
+  
 end module PG2PLplot
-
 !***********************************************************************************************************************************
 
 
@@ -1589,6 +1592,7 @@ end subroutine pgqci
 !! \param str_out  Replacement string
 
 subroutine replace_substring(string, str_in, str_out)
+  implicit none
   character, intent(inout) :: string*(*)
   character, intent(in) :: str_in*(*),str_out*(*)
   integer :: is,l
