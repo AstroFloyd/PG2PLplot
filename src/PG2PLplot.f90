@@ -826,7 +826,7 @@ end subroutine pgmtext
 !! Xwin streams are treated differently, since we want bufferring for smooth animations whereas the other streams are non-buffered.
 
 function pgopen(pgdev)
-  use plplot, only: plspause, plstart, plsfnam, plsdev
+  use plplot, only: plspause, plsfnam, plsdev
   use plplot, only: plmkstrm, plsetopt
   use PG2PLplot, only : is_init  
   implicit none
@@ -873,7 +873,7 @@ end function pgopen
 !! This is a bit simpler than pgopen(), since I don't need to create a new stream for each request.
 
 subroutine pgbegin(i,pgdev,nx,ny)
-  use plplot, only: plspause, plstart, plsfnam, plsetopt, plssub, plsdev
+  use plplot, only: plspause, plsfnam, plsetopt, plssub, plsdev
   use PG2PLplot, only : is_init
   implicit none
   integer, intent(in) :: i,nx,ny
@@ -881,7 +881,10 @@ subroutine pgbegin(i,pgdev,nx,ny)
   integer :: i1, check_error
   character :: pldev*(99),filename*(99)
   
-  i1 = i   ! Is ignored by pgbegin, can't be self, since calling argument is likely a constant
+  ! These are ignored by pgbegin. Can't be self, since calling arguments are likely constants
+  i1 = i
+  i1 = nx
+  i1 = ny
   i1 = i1
   
   call pg2pldev(pgdev, pldev,filename)  ! Extract pldev and filename from pgdev
@@ -1019,12 +1022,15 @@ end subroutine pgsubp
 !> \brief  Advance to the next (sub-)page
 
 subroutine pgpage()
-  use PG2PLplot, only: compatibility_warnings, do_init
+  use PG2PLplot, only: do_init
   implicit none
+  
   call pladv(0)
   call do_init()
+  
 end subroutine pgpage
 !***********************************************************************************************************************************
+
 
 !***********************************************************************************************************************************
 !> \brief  Start buffering output - dummy routine!
@@ -1033,13 +1039,16 @@ subroutine pgbbuf()
   use PG2PLplot, only: compatibility_warnings, do_init
   implicit none
   integer, save :: warn
+  
   call do_init()
+  
   if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
   if(warn.ne.123) write(0,'(/,A,/)') '***  PG2PLplot WARNING: no PLplot equivalent was found for the PGplot routine pgbbuf()  ***'
   warn = 123
   
 end subroutine pgbbuf
 !***********************************************************************************************************************************
+
 
 !***********************************************************************************************************************************
 !> \brief  End buffering output - dummy routine!
@@ -1324,15 +1333,18 @@ end subroutine pg2pldev
 subroutine pgslct(pgdev)
   use PG2PLplot, only: do_init
   use plplot, only : plspause, plgdev
+  
+  implicit none
   integer, intent(in) :: pgdev
-  integer :: cur_stream
   character :: pldev*(99)
+  
   call do_init()
   call plgdev(pldev)
   if (trim(pldev).eq.'xwin') then
      call pleop()
   end if
   call plsstrm(pgdev-1)
+  
 end subroutine pgslct
 !***********************************************************************************************************************************
 
@@ -1431,14 +1443,13 @@ end subroutine pgdraw
 !> \brief  Draw a point
 
 subroutine pgpt(n, x, y, ncode)
-  use plplot, only: plpoin, plflt, plstring, plsym
+  use plplot, only: plpoin, plflt, plsym
   
   implicit none
   integer, intent(in) :: n, ncode
   real(plflt), intent(in), dimension(n) :: x, y
   
   integer :: code
-  character :: code_string*(1024)
   
   
   if(ncode == -3) then
@@ -1450,9 +1461,10 @@ subroutine pgpt(n, x, y, ncode)
   else
      code = ncode
   end if
+  
   call plsym(x, y, code)
+  
 end subroutine pgpt
-
 !***********************************************************************************************************************************
 
 
