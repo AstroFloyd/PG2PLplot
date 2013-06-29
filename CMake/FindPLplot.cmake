@@ -7,7 +7,7 @@
 #
 # This CMake module defines the following variables:
 #  PLplot_FOUND        =  Libraries and headers found; TRUE/FALSE
-#  PLplot_INCLUDES     =  Path to the PLplot header files
+#  PLplot_INCLUDE_DIR  =  Path to the PLplot header files
 #  PLplot_LIBRARIES    =  Path to all parts of the PLplot libraries
 #  PLplot_LIBRARY_DIRS =  Path to the directories containing the PLplot libraries
 
@@ -74,7 +74,6 @@ if( PLplot_INCLUDE_DIR )
     get_filename_component( PLplot_LIBRARY_DIRS ${PLplot_LIBRARY} PATH )
     # Set uncached variables as per standard.
     set( PLplot_FOUND TRUE )
-    set( PLplot_INCLUDES ${PLplot_INCLUDE_DIR} )
     set( PLplot_LIBRARIES ${PLplot_LIBRARY} )
     
   else( PLplot_LIBRARY )
@@ -175,8 +174,8 @@ if( PLplot_FOUND )
   
   if( NOT PLplot_FIND_QUIETLY )
     message( STATUS "Found components for PLplot:" )
-    message( STATUS "* PLplot_INCLUDES  = ${PLplot_INCLUDES}" )
-    message( STATUS "* PLplot_LIBRARIES = ${PLplot_LIBRARIES}" )
+    message( STATUS "* PLplot_INCLUDE_DIR  = ${PLplot_INCLUDE_DIR}" )
+    message( STATUS "* PLplot_LIBRARIES    = ${PLplot_LIBRARIES}" )
   endif( NOT PLplot_FIND_QUIETLY )
   
 else( PLplot_FOUND )
