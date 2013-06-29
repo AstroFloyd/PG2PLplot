@@ -1,6 +1,6 @@
 ##
 ##  CMakeFile for PG2PLplot
-##  MvdS, 12/11/2010
+##  AstroFloyd, 12/11/2010
 ##
 ##  To compile, from the directory that contains this file, do:
 ##    $ mkdir build; cd build

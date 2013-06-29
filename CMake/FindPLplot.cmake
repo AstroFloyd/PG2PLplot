@@ -1,7 +1,7 @@
 ## FindPLplot.cmake:
 ## Check for the presence of the PLplot headers and libraries
 ## This file is biased to finding Fortran libraries
-## MvdS, October 2010
+## AstroFloyd, October 2010
 
 # Check for the presence of the PLplot headers and libraries
 #
