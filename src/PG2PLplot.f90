@@ -16,7 +16,9 @@
 ! You should have received a copy of the GNU General Public License along with this code (LICENCE).  If not, see
 ! <http://www.gnu.org/licenses/>.
 ! 
-
+!
+! PG2PLplot can be found on http://pg2plplot.sourceforge.net
+! Some routines are taken from libSUFR, http://libsufr.sourceforge.net
 
 
 
@@ -34,7 +36,7 @@ module PG2PLplot
   !logical, parameter :: compatibility_warnings = .false.  ! Don't warn
   logical, parameter :: compatibility_warnings = .true.   ! Do warn
   
-  real(8) :: xcur=0, ycur=0
+  real(plflt) :: xcur=0., ycur=0.
   integer :: save_level = 0
   integer, parameter :: max_level = 20
   integer, parameter :: max_open = 100
@@ -46,7 +48,7 @@ module PG2PLplot
   integer :: save_color(max_level)
   integer :: cur_lwidth=1, cur_color=1, cur_lstyle=1
   logical :: is_init
-  real(8) :: paper_width, paper_ratio
+  real(plflt) :: paper_width, paper_ratio
   
 contains
   
@@ -1127,6 +1129,7 @@ subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
   real :: x,y,dx,dy, dpx,dpy, reldiff
   real(plflt) :: p_xmin,p_xmax,p_ymin,p_ymax, plx1,plx2,ply1,ply2, tlen, disp1,pos1,just
   character :: lbl1*(len(lbl))
+  logical :: seq,deq
   
   disp1 = disp
   x = orient  ! Unused
@@ -1148,7 +1151,7 @@ subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
   pos1 = pos
   just = 0.5
   
-  if(reldiff(y1,y2) .le. epsilon(y1)*10 .or. (y1.eq.0.0 .and. y2.eq.0.0)) then                  ! Want horizontal axis
+  if(reldiff(y1,y2) .le. epsilon(y1)*10 .or. (seq(y1,0.) .and. seq(y2,0.))) then                ! Want horizontal axis
      
      plx1 = x
      plx2 = x
@@ -1167,13 +1170,13 @@ subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
      end if
      
      ! Print labels:
-     if(abs(reldiff(y,real(p_ymin))) .le. epsilon(y)*10 .or. (y.eq.0.0 .and. p_ymin.eq.0.0)) then
+     if(abs(reldiff(y,real(p_ymin))) .le. epsilon(y)*10 .or. (seq(y,0.) .and. deq(p_ymin,0.0_plflt))) then
         call plmtex('B', disp1, pos1, just, trim(lbl1))                                         ! Print label below the bottom axis
      else
         call plmtex('T', disp1, pos1, just, trim(lbl1))                                         ! Print label above the top axis
      end if
      
-  else if(reldiff(x1,x2) .le. epsilon(x1)*10 .or. (x1.eq.0.0 .and. x2.eq.0.0)) then             ! Want vertical axis
+  else if(reldiff(x1,x2) .le. epsilon(x1)*10 .or. (seq(x1,0.) .and. seq(x2,0.))) then           ! Want vertical axis
      
      ply1 = y
      ply2 = y
@@ -1192,7 +1195,7 @@ subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
      end if
      
      ! Print labels:
-     if(abs(reldiff(x,real(p_xmin))) .le. epsilon(x)*10 .or. (x.eq.0.0 .and. p_xmin.eq.0.0)) then
+     if(abs(reldiff(x,real(p_xmin))) .le. epsilon(x)*10 .or. (seq(x,0.) .and. deq(p_xmin,0.0_plflt))) then
         call plmtex('L', disp1, pos1, just, trim(lbl1))                           ! Print label to the left of the left-hand axis
      else
         call plmtex('R', disp1, pos1, just, trim(lbl1))                           ! Print label to the right of the right-hand axis
@@ -1653,4 +1656,52 @@ function check_error(fname)
   
 end function check_error
 !***********************************************************************************************************************************
+
+!***********************************************************************************************************************************
+!> \brief  Test whether two double-precision variables are equal to better than twice the machine precision, taken from libSUFR
+!!
+!! \param x1  First number
+!! \param x2  Second number
+
+function deq(x1,x2)
+  use plplot, only: plflt
+  
+  implicit none
+  real(plflt), intent(in) :: x1,x2
+  real(plflt) :: eps
+  logical :: deq
+  
+  eps = 2*tiny(x1)
+  if(abs(x1-x2).le.eps) then
+     deq = .true.
+  else
+     deq = .false.
+  end if
+  
+end function deq
+!***********************************************************************************************************************************
+
+
+!***********************************************************************************************************************************
+!> \brief  Test whether two single-precision variables are equal to better than twice the machine precision, taken from libSUFR
+!!
+!! \param x1  First number
+!! \param x2  Second number
+
+function seq(x1,x2)
+  implicit none
+  real, intent(in) :: x1,x2
+  real :: eps
+  logical :: seq
+  
+  eps = 2*tiny(x1)
+  if(abs(x1-x2).le.eps) then
+     seq = .true.
+  else
+     seq = .false.
+  end if
+  
+end function seq
+!***********************************************************************************************************************************
+
 
