@@ -108,7 +108,7 @@ subroutine pgslw(lw)
   cur_lwidth = lw
   lw1 = max(min(lw,201),1)
   lw2 = lw1 - 1
-  call plwid(lw2)
+  call plwidth(lw2)
   
   !print*,'pgslw: ',lw,lw1,lw2
   
