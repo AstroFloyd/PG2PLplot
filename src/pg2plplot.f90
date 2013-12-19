@@ -1,4 +1,4 @@
-!> \file PG2PLplot.f90  Contains pgplot-to-plplot bindings (i.e., call PLplot from PGplot commands)
+!> \file pg2plplot.f90  Contains pgplot-to-plplot bindings (i.e., call PLplot from PGplot commands)
 
 ! 
 ! LICENCE:

@@ -48,9 +48,9 @@ include( SetCompileOptions )
 # Place the products in their directories:
 get_filename_component( Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME )
 if( COMPILER_SPECIFIC_LIBS )
-  set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/PG2PLplot/${Fortran_COMPILER_NAME}" )
+  set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/pg2plplot/${Fortran_COMPILER_NAME}" )
 else( COMPILER_SPECIFIC_LIBS )
-  set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/PG2PLplot" )
+  set( MODULE_DIRECTORY "${CMAKE_SOURCE_DIR}/usr/include/pg2plplot" )
 endif( COMPILER_SPECIFIC_LIBS )
 
 set( LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/usr/lib${LIB_SUFFIX}" )
@@ -70,27 +70,27 @@ include( CompilerFlags_Fortran )
 
 # Create libraries:
 if( CREATE_SHAREDLIB )
-  add_library( "PG2PLplot_shared"  SHARED  ${SRC_FILES} )
+  add_library( "pg2plplot_shared"  SHARED  ${SRC_FILES} )
   if( COMPILER_SPECIFIC_LIBS )
-    set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}" )
+    set_target_properties( pg2plplot_shared PROPERTIES OUTPUT_NAME "pg2plplot_${Fortran_COMPILER_NAME}" )
   else( COMPILER_SPECIFIC_LIBS )
-    set_target_properties( PG2PLplot_shared PROPERTIES OUTPUT_NAME "PG2PLplot" )
+    set_target_properties( pg2plplot_shared PROPERTIES OUTPUT_NAME "pg2plplot" )
   endif( COMPILER_SPECIFIC_LIBS )
-  set_target_properties( PG2PLplot_shared PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY} )
+  set_target_properties( pg2plplot_shared PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY} )
 endif( CREATE_SHAREDLIB )
 
 if( CREATE_STATICLIB )
-  add_library( "PG2PLplot_static"  STATIC  ${SRC_FILES} )
+  add_library( "pg2plplot_static"  STATIC  ${SRC_FILES} )
   if( COMPILER_SPECIFIC_LIBS )
-    set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot_${Fortran_COMPILER_NAME}" )
+    set_target_properties( pg2plplot_static PROPERTIES OUTPUT_NAME "pg2plplot_${Fortran_COMPILER_NAME}" )
   else( COMPILER_SPECIFIC_LIBS )
-    set_target_properties( PG2PLplot_static PROPERTIES OUTPUT_NAME "PG2PLplot" )
+    set_target_properties( pg2plplot_static PROPERTIES OUTPUT_NAME "pg2plplot" )
   endif( COMPILER_SPECIFIC_LIBS )
-  set_target_properties( PG2PLplot_static PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY} )
+  set_target_properties( pg2plplot_static PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY} )
 endif( CREATE_STATICLIB )
 
 
 # Install to destination:
 #   use DIRECTORY rather than TARGETS to allow include/<fortrancompiler>/
 install( DIRECTORY usr/ DESTINATION ${CMAKE_INSTALL_PREFIX} )
-install( FILES src/rgb.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/share/PG2PLplot)
+install( FILES src/rgb.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/share/pg2plplot)
