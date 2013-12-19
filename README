@@ -1,8 +1,53 @@
-PG2PLplot
 
-PG2PLplot is a library intended to help the transition from Fortran code linked against PGPlot, to linking it against PLplot.  The library contains pgplot-to-plplot bindings to enable calling PLplot using PGplot commands.
+PG2PLplot README
 
-See:
-http://pg2plplot.sourceforge.net/
-https://github.com/AstroFloyd/PG2PLplot
+The idea of this library is to facilitate the transition from Fortran code linked 
+against PGPlot to linking it against PLplot, which is open source and maintained.
+Currently, many PGPlot routines are included, but the code is by no means exhaustive.
+One-to-one translation is sometimes perfectly possible, sometimes difficult, and
+sometimes impossible.  In the first case, the code should run without any problems
+(even though for instance the line style or pen colour may be somewhat different),
+in the second case an imperfect translation is silently done, in the third case the
+code will warn that no translation exists.
+
+You can either build and link against the library, or include the source file in
+your code. To download the PG2PLplot package, to read the code documentation, or to 
+contact the developers, see: 
+See http://pg2plplot.sourceforge.net/
+
+
+
+INSTALLATION:
+
+For installation instructions, see INSTALL.
+
+
+USAGE:
+
+After installation, you should typically do something like this to use your code 
+containing PGPlot calls with PLplot:
+
+  gfortran -lplplotf95d -lplplotf95cd -lpg2plplot code.f90 -o program
+
+If you are using CMake, you can use FindPG2PLplot.cmake and CMakeLocations.cmake
+from CMakeFiles (cmakefiles.sf.net).
+
+
+LICENCE:
+
+Copyright (c) 2009-2013 AstroFloyd, joequant
+ 
+This file is part of the PG2PLplot package.
+ 
+This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this code (LICENCE).  If not, see 
+<http://www.gnu.org/licenses/>.
+
+
+
 
