@@ -78,11 +78,12 @@ subroutine pgsls(ls)
   implicit none
   integer, intent(in) :: ls
   integer :: ls1,ls2, styles(5)
+  
   cur_lstyle = ls
   styles = (/1,4,5,2,6/)
   
   ls1 = ls   ! 1: solid, 2: dashes, 3: dash-dotted, 4: dotted, 5: dash-dot-dot-dot
-  if (ls1.lt.1.or.ls1.gt.5) ls1 = 1
+  if(ls1.lt.1.or.ls1.gt.5) ls1 = 1
   
   
   ls2 = styles(ls1)  ! 1: solid, 2: short dashes, 3: long dashes, 4: long dashes, short gaps, 5: long-short dashes, 
@@ -101,13 +102,17 @@ end subroutine pgsls
 !! \param lw  Line width
 
 subroutine pgslw(lw)
+  use plplot, only: plflt
   use PG2PLplot, only : cur_lwidth
   implicit none
   integer, intent(in) :: lw
-  integer :: lw1,lw2
+  integer :: lw1
+  real(kind=plflt) :: lw2
+  
   cur_lwidth = lw
   lw1 = max(min(lw,201),1)
-  lw2 = lw1 - 1
+  lw2 = real(lw1 - 1)
+  
   call plwidth(lw2)
   
   !print*,'pgslw: ',lw,lw1,lw2
@@ -205,7 +210,7 @@ end subroutine pgscr
 !! \retval g    Green colour (0-1)
 !! \retval b    Blue colour (0-1)
 
-subroutine pgqcr(ci1,r,g,b)
+subroutine pgqcr(ci1, r,g,b)
   implicit none
   integer, intent(in) :: ci1
   real, intent(out) :: r,g,b
@@ -952,6 +957,7 @@ subroutine pgpap(width,ratio)
   
   call plspage(xp,yp,xlen,ylen,xoff,yoff)  ! Must be called before plinit()!
   call do_init()
+  
 end subroutine pgpap
 !***********************************************************************************************************************************
 
@@ -1586,6 +1592,24 @@ subroutine pgqci(ci)
   warn = 123
   
 end subroutine pgqci
+!***********************************************************************************************************************************
+
+
+
+!***********************************************************************************************************************************
+!> \brief  Print user name and date in plot - dummy routine!
+
+subroutine pgiden()
+  use PG2PLplot, only: compatibility_warnings
+  
+  implicit none
+  integer, save :: warn
+  
+  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
+  if(warn.ne.123) call warn_dummy_routine('pgiden','ignoring')
+  warn = 123
+  
+end subroutine pgiden
 !***********************************************************************************************************************************
 
 
