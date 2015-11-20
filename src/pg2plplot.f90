@@ -892,7 +892,13 @@ subroutine pgmtext(side, disp, pos, just, text)
 end subroutine pgmtext
 !***********************************************************************************************************************************
 
-!> interface for pglab
+
+!***********************************************************************************************************************************
+!> \brief Interface for pglab
+!!
+!! \param xlbl    Label for the horizontal axis
+!! \param ylbl    Label for the vertical axis
+!! \param toplbl  Plot title
 
 subroutine pglab(xlbl, ylbl, toplbl)
   implicit none
@@ -903,13 +909,21 @@ subroutine pglab(xlbl, ylbl, toplbl)
   call pgmtxt('L', 2.2, 0.5, 0.5, YLBL)
   call pgebuf
 end subroutine pglab
+!***********************************************************************************************************************************
 
-!> alias for pglab
+!***********************************************************************************************************************************
+!> \brief Alias for pglab
+!!
+!! \param xlbl    Label for the horizontal axis
+!! \param ylbl    Label for the vertical axis
+!! \param toplbl  Plot title
+
 subroutine pglabel(xlbl, ylbl, toplbl)
   implicit none
   character, intent(in) :: xlbl*(*), ylbl*(*), toplbl*(*)
   call pglab(xlbl, ylbl, toplbl)
 end subroutine pglabel
+!***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
 !> \brief  Start a new plot
@@ -956,12 +970,18 @@ function pgopen(pgdev)
 end function pgopen
 !***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
+!> \brief  Inquire current device identifier
+!!
+!! \retval  Device identifier
+
 subroutine pgqid(id)
   use PG2PLplot, only : devid
   implicit none
   integer, intent(out) :: id
   id = devid
 end subroutine pgqid
+!***********************************************************************************************************************************
 
 
 !***********************************************************************************************************************************
@@ -1005,13 +1025,23 @@ subroutine pgbegin(i,pgdev,nx,ny)
   call plspause(.false.)                ! Pause at plend()
 end subroutine pgbegin
 !***********************************************************************************************************************************
-!> \brief alias for pgbeg
+
+!***********************************************************************************************************************************
+!> \brief  Alias for pgbegin
+!!
+!! \param i      Display ID
+!! \param pgdev  PGplot device
+!! \param nx     Number of frames in the x-direction
+!! \param ny     Number of frames in the y-direction
+
 subroutine pgbeg(i, pgdev, nx, ny)
   implicit none
   integer, intent(in) :: i,nx,ny
   character, intent(in) :: pgdev*(*)
   call pgbegin(i, pgdev, nx, ny)
 end subroutine pgbeg
+!***********************************************************************************************************************************
+
 
 !***********************************************************************************************************************************
 !> \brief  End a plot
@@ -1109,7 +1139,15 @@ subroutine pgswin(xmin1,xmax1,ymin1,ymax1)
   
 end subroutine pgswin
 !***********************************************************************************************************************************
+
+!***********************************************************************************************************************************
 !> \brief alias for pgswin
+!!
+!! \param xmin1  Left
+!! \param xmax1  Right
+!! \param ymin1  Top
+!! \param ymax1  Bottom
+
 subroutine pgwindow(xmin1,xmax1,ymin1,ymax1)
   use plplot, only: plflt
   
@@ -1118,6 +1156,7 @@ subroutine pgwindow(xmin1,xmax1,ymin1,ymax1)
   real(kind=plflt) :: xmin2,xmax2,ymin2,ymax2
   call plwind(xmin2,xmax2,ymin2,ymax2)
 end subroutine pgwindow
+!***********************************************************************************************************************************
 
 
 !***********************************************************************************************************************************
@@ -1148,10 +1187,13 @@ subroutine pgpage()
   
 end subroutine pgpage
 !***********************************************************************************************************************************
+
+!***********************************************************************************************************************************
 !> Alias for pgpage
 subroutine pgadvance()
   call pgpage()
 end subroutine pgadvance
+!***********************************************************************************************************************************
 
 
 !***********************************************************************************************************************************
@@ -1414,7 +1456,6 @@ end subroutine pg2pltext
 !!  - pngcairo:  
 !!  - pngqt:     
 
-
 subroutine pg2pldev(pgdev, pldev,filename)
   implicit none
   character, intent(in) :: pgdev*(*)
@@ -1532,6 +1573,9 @@ end subroutine pgunsa
 
 !***********************************************************************************************************************************
 !> \brief  Move pen to location - for use with pgdraw() only!
+!!
+!! \param x  Horizontal location
+!! \param y  Vertical location
 
 subroutine pgmove(x, y)
   use PG2PLplot, only: xcur, ycur
@@ -1547,6 +1591,9 @@ end subroutine pgmove
 
 !***********************************************************************************************************************************
 !> \brief  Draw line to location
+!!
+!! \param x  Horizontal location
+!! \param y  Vertical location
 
 subroutine pgdraw(x, y)
   use PG2PLplot, only: xcur, ycur
@@ -1567,6 +1614,11 @@ end subroutine pgdraw
 
 !***********************************************************************************************************************************
 !> \brief  Draw a point
+!!
+!! \param n      Number of data points to draw
+!! \param x      Horizontal locations
+!! \param y      Vertical locations
+!! \param ncode  Plot symbol
 
 subroutine pgpt(n, x, y, ncode)
   use plplot, only: plpoin, plflt, plsym
@@ -1595,7 +1647,11 @@ end subroutine pgpt
 
 
 !***********************************************************************************************************************************
-!> \brief  Draw a point
+!> \brief  Draw a single point
+!!
+!! \param x      Horizontal location
+!! \param y      Vertical location
+!! \param ncode  Plot symbol
 
 subroutine pgpt1(x, y, ncode)
   use plplot, only: plpoin, plflt
@@ -1625,6 +1681,7 @@ end subroutine pgclos
 
 !***********************************************************************************************************************************
 !> \brief  Get cursor location - dummy routine!
+!!
 
 subroutine pgband(mode, posn, xref, yref, x, y, ch)
   use PG2PLplot, only: compatibility_warnings
@@ -1685,6 +1742,8 @@ end subroutine pgqcol
 
 !***********************************************************************************************************************************
 !> \brief  Get current colour index - dummy routine!
+!!
+!! \retval ci  Colour index
 
 subroutine pgqci(ci)
   use PG2PLplot, only: compatibility_warnings
@@ -1702,7 +1761,21 @@ subroutine pgqci(ci)
 end subroutine pgqci
 !***********************************************************************************************************************************
 
+
+!***********************************************************************************************************************************
 !> \brief get viewport size
+!!
+!! \param: units  specify the units of the output parameters:
+!!                - 0 : normalized device coordinates
+!!                - 1 : inches
+!!                - 2 : millimeters
+!!                - 3 : pixels
+!!
+!! \retval x1  Left
+!! \retval x2  Right
+!! \retval y1  Bottom
+!! \retval y2  Top
+
 subroutine pgqvp(units, x1, x2, y1, y2)
   use plplot, only: plflt
   use PG2PLplot, only : mm_per_inch
@@ -1775,6 +1848,7 @@ subroutine pgqvsz(units, x1, x2, y1, y2)
      return
   endif
 end subroutine pgqvsz
+!***********************************************************************************************************************************
 
 
 !***********************************************************************************************************************************
@@ -1795,7 +1869,14 @@ end subroutine pgiden
 
 
 
+!***********************************************************************************************************************************
 !> \brief get window size
+!!
+!! \retval x1  Left
+!! \retval x2  Right
+!! \retval y1  Bottom
+!! \retval y2  Top
+
 subroutine pgqwin(x1, x2, y1, y2)
   use plplot, only: plflt
   implicit none
@@ -1807,11 +1888,17 @@ subroutine pgqwin(x1, x2, y1, y2)
   y1 = ymin
   y2 = ymax
 end subroutine pgqwin
+!***********************************************************************************************************************************
 
-!> \brief flush
+
+!***********************************************************************************************************************************
+!> \brief  Flush - dummy routine
+
 subroutine pgupdt()
   return
 end subroutine pgupdt
+!***********************************************************************************************************************************
+
 
 !***********************************************************************************************************************************
 !> \brief  Search and replace occurences of a substring in a string, taken from libSUFR
@@ -1837,27 +1924,36 @@ subroutine replace_substring(string, str_in, str_out)
 end subroutine replace_substring
 !***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgqfs(fs)
   implicit none
   integer, intent(out) :: fs
   fs = 1
 end subroutine pgqfs
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgstbg(b)
   implicit none
   integer, intent(in) :: b
 end subroutine pgstbg
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgqtbg(b)
   implicit none
   integer, intent(out) :: b
 end subroutine pgqtbg
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgask(flag)
   implicit none
   logical, intent(in) :: flag
 end subroutine pgask
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgenv(xmin, xmax, ymin, ymax, just, axis)
   use plplot, only: plflt
   implicit none
@@ -1870,7 +1966,9 @@ subroutine pgenv(xmin, xmax, ymin, ymax, just, axis)
   ymaxp = ymax
   call plenv(xminp, xmaxp, yminp, ymaxp, just, axis)
 end subroutine pgenv
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgbin(nbin, x, data, center)
   use plplot, only: plflt, plbin
   implicit none
@@ -1886,7 +1984,9 @@ subroutine pgbin(nbin, x, data, center)
   endif
   call plbin(xp, datap, opt)
 end subroutine pgbin
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgerry(n, x, ymin, ymax, t)
   use plplot, only: plflt, plerry
   implicit none
@@ -1899,7 +1999,9 @@ subroutine pgerry(n, x, ymin, ymax, t)
   ymaxp = ymax(1:n)
   call plerry(xp, yminp, ymaxp)
 end subroutine pgerry
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgvsiz(xleft, xright, ybot, ytop)
   use plplot, only: plflt
   implicit none
@@ -1911,13 +2013,17 @@ subroutine pgvsiz(xleft, xright, ybot, ytop)
   y2p=ytop
   call plsvpa(x1p, x2p, y1p, y2p)
 end subroutine pgvsiz
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgvsize(xleft, xright, ybot, ytop)
   implicit none
   real, intent(in) :: xleft, xright, ybot, ytop
   call pgvsiz(xleft, xright, ybot, ytop)
 end subroutine pgvsize
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pglen(units, string, xl, yl)
   implicit none
   character, intent(in) :: string *(*)
@@ -1927,7 +2033,9 @@ subroutine pglen(units, string, xl, yl)
   xl = 1.0
   yl = 1.0
 end subroutine pglen
+!***********************************************************************************************************************************
 
+!***********************************************************************************************************************************
 subroutine pgqtxt(x, y, angle, fjust, text, xbox, ybox)
   implicit none
   character, intent(in) :: text *(*)
@@ -1943,6 +2051,7 @@ subroutine pgqtxt(x, y, angle, fjust, text, xbox, ybox)
   ybox(3) = 0.0
   ybox(4) = 1.0
 end subroutine pgqtxt
+!***********************************************************************************************************************************
 
 
 
