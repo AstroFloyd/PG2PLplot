@@ -40,6 +40,7 @@ module PG2PLplot
   integer :: save_level = 0
   integer, parameter :: max_level = 20
   integer, parameter :: max_open = 100
+  real(plflt), parameter :: mm_per_inch = 25.4
   integer :: save_ffamily(max_level)
   integer :: save_fstyle(max_level)
   integer :: save_fweight(max_level)
@@ -47,6 +48,7 @@ module PG2PLplot
   integer :: save_lstyle(max_level)
   integer :: save_color(max_level)
   integer :: cur_lwidth=1, cur_color=1, cur_lstyle=1
+  integer :: devid=0
   logical :: is_init
   real(plflt) :: paper_width, paper_ratio
   
@@ -95,6 +97,14 @@ subroutine pgsls(ls)
   
 end subroutine pgsls
 !***********************************************************************************************************************************
+
+!> \brief query line style
+subroutine pgqls(ls)
+  use PG2PLplot, only : cur_lstyle
+  implicit none
+  integer, intent(out) :: ls
+  ls = cur_lstyle
+end subroutine pgqls
 
 !***********************************************************************************************************************************
 !> \brief  Set line width
@@ -148,6 +158,33 @@ subroutine pgscf(cf)
   
 end subroutine pgscf
 !***********************************************************************************************************************************
+
+!> \brief set query font
+subroutine pgqcf(cf)
+  implicit none
+  integer, intent(out) :: cf
+  integer :: family, style, weight
+  call plgfont(family, style, weight)
+  if (style .eq. 1) then
+     cf = 3
+     return
+  elseif (family .eq. 1) then
+     cf = 2
+     return
+  elseif (family .eq. 3) then
+     cf = 4
+     return
+  endif
+  cf = 1
+end subroutine pgqcf
+
+!> \brief
+subroutine pgqinf(item, value, length)
+  implicit none
+  character, intent(in) :: item*(*)
+  character, intent(out) :: value*(*)
+  integer, intent(in) :: length
+end subroutine pgqinf
 
 !***********************************************************************************************************************************
 !> \brief  Set colour index
@@ -357,6 +394,33 @@ subroutine pgsch(ch)
 end subroutine pgsch
 !***********************************************************************************************************************************
 
+!>\brief
+
+subroutine pgqcs(unit, xch, ych)
+  use plplot, only: plflt
+  use PG2PLplot, only: ch_fac, mm_per_inch
+  
+  implicit none
+  integer, intent(in) :: unit
+  real, intent(out) :: xch, ych
+  real(kind=plflt) :: ch1,ch2
+  real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
+  call plgchr(ch1,ch2)
+  if (unit.eq.2) then
+     xch = ch2
+     ych = ch2
+  elseif (unit .eq. 1) then
+     xch = ch2 / mm_per_inch
+     ych = ch2 / mm_per_inch
+  elseif (unit .eq. 0) then
+     call plgpage(xp, yp, xleng, yleng, xoff, yoff)
+     xch = ch2 / yleng
+     ych = ch2 / yleng
+  else
+     print *, 'unknown unit in pgqcs', unit
+  endif
+
+end subroutine pgqcs
 
 !***********************************************************************************************************************************
 !> \brief  Query character height
@@ -828,7 +892,24 @@ subroutine pgmtext(side, disp, pos, just, text)
 end subroutine pgmtext
 !***********************************************************************************************************************************
 
+!> interface for pglab
 
+subroutine pglab(xlbl, ylbl, toplbl)
+  implicit none
+  character, intent(in) :: xlbl*(*), ylbl*(*), toplbl*(*)
+  call pgbbuf
+  call pgmtxt('T', 2.0, 0.5, 0.5, TOPLBL)
+  call pgmtxt('B', 3.2, 0.5, 0.5, XLBL)
+  call pgmtxt('L', 2.2, 0.5, 0.5, YLBL)
+  call pgebuf
+end subroutine pglab
+
+!> alias for pglab
+subroutine pglabel(xlbl, ylbl, toplbl)
+  implicit none
+  character, intent(in) :: xlbl*(*), ylbl*(*), toplbl*(*)
+  call pglab(xlbl, ylbl, toplbl)
+end subroutine pglabel
 
 !***********************************************************************************************************************************
 !> \brief  Start a new plot
@@ -841,7 +922,7 @@ end subroutine pgmtext
 function pgopen(pgdev)
   use plplot, only: plspause, plsfnam, plsdev
   use plplot, only: plmkstrm, plsetopt
-  use PG2PLplot, only : is_init  
+  use PG2PLplot, only : is_init, devid
   implicit none
   integer :: pgopen
   character, intent(in) :: pgdev*(*)
@@ -870,9 +951,17 @@ function pgopen(pgdev)
   call plspause(.false.)                ! Pause at plend()
   
   pgopen = cur_stream + 1
+  devid = pgopen
   is_init = .false.
 end function pgopen
 !***********************************************************************************************************************************
+
+subroutine pgqid(id)
+  use PG2PLplot, only : devid
+  implicit none
+  integer, intent(out) :: id
+  id = devid
+end subroutine pgqid
 
 
 !***********************************************************************************************************************************
@@ -916,7 +1005,13 @@ subroutine pgbegin(i,pgdev,nx,ny)
   call plspause(.false.)                ! Pause at plend()
 end subroutine pgbegin
 !***********************************************************************************************************************************
-
+!> \brief alias for pgbeg
+subroutine pgbeg(i, pgdev, nx, ny)
+  implicit none
+  integer, intent(in) :: i,nx,ny
+  character, intent(in) :: pgdev*(*)
+  call pgbegin(i, pgdev, nx, ny)
+end subroutine pgbeg
 
 !***********************************************************************************************************************************
 !> \brief  End a plot
@@ -1014,6 +1109,15 @@ subroutine pgswin(xmin1,xmax1,ymin1,ymax1)
   
 end subroutine pgswin
 !***********************************************************************************************************************************
+!> \brief alias for pgswin
+subroutine pgwindow(xmin1,xmax1,ymin1,ymax1)
+  use plplot, only: plflt
+  
+  implicit none
+  real, intent(in) :: xmin1,xmax1,ymin1,ymax1
+  real(kind=plflt) :: xmin2,xmax2,ymin2,ymax2
+  call plwind(xmin2,xmax2,ymin2,ymax2)
+end subroutine pgwindow
 
 
 !***********************************************************************************************************************************
@@ -1044,6 +1148,10 @@ subroutine pgpage()
   
 end subroutine pgpage
 !***********************************************************************************************************************************
+!> Alias for pgpage
+subroutine pgadvance()
+  call pgpage()
+end subroutine pgadvance
 
 
 !***********************************************************************************************************************************
@@ -1594,6 +1702,79 @@ subroutine pgqci(ci)
 end subroutine pgqci
 !***********************************************************************************************************************************
 
+!> \brief get viewport size
+subroutine pgqvp(units, x1, x2, y1, y2)
+  use plplot, only: plflt
+  use PG2PLplot, only : mm_per_inch
+  implicit none
+  integer, intent(in):: units
+  real, intent(out):: x1, x2, y1, y2
+  real(kind=plflt) x1d, x2d, y1d, y2d
+  real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
+  call plgvpd(x1d, x2d, y1d, y2d)
+  if(units .ne. 0) then
+     call plgpage(xp, yp, xleng, yleng, xoff, yoff)
+     x1 = (x1d * xleng - xoff) 
+     x2 = (x2d * xleng - xoff)
+     y1 = (y1d * yleng - yoff)
+     y2 = (y2d * yleng - yoff) 
+     if (units .eq. 3) then
+        return
+     elseif (units .eq. 2) then
+        x1 = x1 / xp * mm_per_inch
+        x2 = x2 / xp* mm_per_inch
+        y1 = y1 / yp * mm_per_inch
+        y2 = y2 / yp* mm_per_inch
+        return
+     elseif (units .eq. 1) then
+        x1 = x1 / xp
+        x2 = x2 / xp
+        y1 = y1 / yp
+        y2 = y2 / yp
+        return
+     endif
+  else
+     print *, "unknown units in pgqvp", units
+  endif
+  x1=x1d
+  x2=x2d
+  y1=y1d
+  y2=y2d
+end subroutine pgqvp
+
+!> \brief get view surface
+subroutine pgqvsz(units, x1, x2, y1, y2)
+  use plplot, only: plflt
+  use PG2PLplot, only : mm_per_inch
+  implicit none
+  integer, intent(in):: units
+  real, intent(out):: x1, x2, y1, y2
+  real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
+  x1 = 0.0
+  y1 = 0.0
+
+  if(units .eq. 0) then
+     x2 = 1.0
+     y2 = 1.0
+     return
+  endif
+
+  call plgpage(xp, yp, xleng, yleng, xoff, yoff)
+  if (units .eq. 3) then
+     x2 = xleng
+     y2 = yleng
+  elseif (units .eq. 2) then
+     x2 = xleng / xp* mm_per_inch
+     y2 = yleng / yp* mm_per_inch
+  elseif (units .eq. 1) then
+     x2 = x2 / xp
+     y2 = y2 / yp
+     return
+  else
+     print *, 'undefined units in pgqvsz'
+     return
+  endif
+end subroutine pgqvsz
 
 
 !***********************************************************************************************************************************
@@ -1614,6 +1795,23 @@ end subroutine pgiden
 
 
 
+!> \brief get window size
+subroutine pgqwin(x1, x2, y1, y2)
+  use plplot, only: plflt
+  implicit none
+  real, intent(out):: x1, x2, y1, y2
+  real(kind=plflt):: xmin, xmax, ymin, ymax
+  call plgspa(xmin, xmax, ymin, ymax)
+  x1 = xmin
+  x2 = xmax
+  y1 = ymin
+  y2 = ymax
+end subroutine pgqwin
+
+!> \brief flush
+subroutine pgupdt()
+  return
+end subroutine pgupdt
 
 !***********************************************************************************************************************************
 !> \brief  Search and replace occurences of a substring in a string, taken from libSUFR
@@ -1638,6 +1836,114 @@ subroutine replace_substring(string, str_in, str_out)
   
 end subroutine replace_substring
 !***********************************************************************************************************************************
+
+subroutine pgqfs(fs)
+  implicit none
+  integer, intent(out) :: fs
+  fs = 1
+end subroutine pgqfs
+
+subroutine pgstbg(b)
+  implicit none
+  integer, intent(in) :: b
+end subroutine pgstbg
+
+subroutine pgqtbg(b)
+  implicit none
+  integer, intent(out) :: b
+end subroutine pgqtbg
+
+subroutine pgask(flag)
+  implicit none
+  logical, intent(in) :: flag
+end subroutine pgask
+
+subroutine pgenv(xmin, xmax, ymin, ymax, just, axis)
+  use plplot, only: plflt
+  implicit none
+  real, intent(in) :: xmin, xmax, ymin, ymax
+  integer, intent(in) :: just, axis
+  real(kind=plflt) :: xminp, xmaxp, yminp, ymaxp
+  xminp = xmin
+  xmaxp = xmax
+  yminp = ymin
+  ymaxp = ymax
+  call plenv(xminp, xmaxp, yminp, ymaxp, just, axis)
+end subroutine pgenv
+
+subroutine pgbin(nbin, x, data, center)
+  use plplot, only: plflt, plbin
+  implicit none
+  integer, intent(in) :: nbin
+  real, intent(in) :: x(*), data(*)
+  logical, intent(in) :: center
+  real(kind=plflt) :: xp(nbin), datap(nbin)
+  integer :: opt
+  xp = x(1:nbin)
+  datap = data(1:nbin)
+  if (center) then
+     opt = 1
+  endif
+  call plbin(xp, datap, opt)
+end subroutine pgbin
+
+subroutine pgerry(n, x, ymin, ymax, t)
+  use plplot, only: plflt, plerry
+  implicit none
+  integer, intent(in) :: n
+  real, intent(in) :: x(*), ymin(*), ymax(*), t
+  real(kind=plflt) :: xp(n), yminp(n), ymaxp(n)
+
+  xp = x(1:n)
+  yminp = ymin(1:n)
+  ymaxp = ymax(1:n)
+  call plerry(xp, yminp, ymaxp)
+end subroutine pgerry
+
+subroutine pgvsiz(xleft, xright, ybot, ytop)
+  use plplot, only: plflt
+  implicit none
+  real, intent(in) :: xleft, xright, ybot, ytop
+  real(kind=plflt) :: x1p, x2p, y1p, y2p
+  x1p=xleft
+  x2p=xright
+  y1p=ybot
+  y2p=ytop
+  call plsvpa(x1p, x2p, y1p, y2p)
+end subroutine pgvsiz
+
+subroutine pgvsize(xleft, xright, ybot, ytop)
+  implicit none
+  real, intent(in) :: xleft, xright, ybot, ytop
+  call pgvsiz(xleft, xright, ybot, ytop)
+end subroutine pgvsize
+
+subroutine pglen(units, string, xl, yl)
+  implicit none
+  character, intent(in) :: string *(*)
+  integer, intent(in) :: units
+  real, intent(out):: xl, yl
+  print *, "pglen not implemented"
+  xl = 1.0
+  yl = 1.0
+end subroutine pglen
+
+subroutine pgqtxt(x, y, angle, fjust, text, xbox, ybox)
+  implicit none
+  character, intent(in) :: text *(*)
+  integer, intent(in) :: x, y, angle, fjust
+  real, intent(out):: xbox(4), ybox(4)
+  print *, "pgqtxt not implemented"
+  xbox(1) = 0.0
+  xbox(2) = 1.0
+  xbox(3) = 0.0
+  xbox(4) = 1.0
+  ybox(1) = 0.0
+  ybox(2) = 1.0
+  ybox(3) = 0.0
+  ybox(4) = 1.0
+end subroutine pgqtxt
+
 
 
 
