@@ -190,12 +190,12 @@ end subroutine pgqcf
 !! \retval value
 !! \retval length
 
-
 subroutine pgqinf(item, value, length)
   implicit none
   character, intent(in) :: item*(*)
   character, intent(out) :: value*(*)
   integer, intent(out) :: length
+  value = item(1:1)
   value = 'Dummy'
   length = 5
 end subroutine pgqinf
@@ -418,7 +418,7 @@ end subroutine pgsch
 
 subroutine pgqcs(unit, xch, ych)
   use plplot, only: plflt
-  use PG2PLplot, only: ch_fac, mm_per_inch
+  use PG2PLplot, only: mm_per_inch
   
   implicit none
   integer, intent(in) :: unit
@@ -1175,7 +1175,13 @@ subroutine pgwindow(xmin1,xmax1,ymin1,ymax1)
   implicit none
   real, intent(in) :: xmin1,xmax1,ymin1,ymax1
   real(kind=plflt) :: xmin2,xmax2,ymin2,ymax2
+  
+  xmin2 = dble(xmin1)
+  xmax2 = dble(xmax1)
+  ymin2 = dble(ymin1)
+  ymax2 = dble(ymax1)
   call plwind(xmin2,xmax2,ymin2,ymax2)
+  
 end subroutine pgwindow
 !***********************************************************************************************************************************
 
@@ -1507,6 +1513,7 @@ subroutine pg2pldev(pgdev, pldev,filename)
   
   ! Use pngcairo rather than png, since I get segfaults if outputing to both X11 and png which pulls in pngqt (joequant):
   if(pldev .eq. 'png') pldev = 'pngcairo'
+  
 end subroutine pg2pldev
 !***********************************************************************************************************************************
 
@@ -1965,6 +1972,9 @@ end subroutine pgqfs
 subroutine pgstbg(b)
   implicit none
   integer, intent(in) :: b
+  integer :: bb
+  bb = b   ! Use the dummy variable to prevent compiler complaints
+  bb = bb  ! Use the local variable after setting it to prevent compiler complaints
 end subroutine pgstbg
 !***********************************************************************************************************************************
 
@@ -1989,6 +1999,9 @@ end subroutine pgqtbg
 subroutine pgask(prompt)
   implicit none
   logical, intent(in) :: prompt
+  logical :: prompt1
+  prompt1 = prompt   ! Use the dummy variable to prevent compiler complaints
+  prompt1 = prompt1  ! Use the local variable after setting it to prevent compiler complaints
 end subroutine pgask
 !***********************************************************************************************************************************
 
@@ -2055,10 +2068,11 @@ subroutine pgerry(n, x, ymax, ymin, t)
   real, intent(in) :: x(*), ymin(*), ymax(*), t
   real(kind=plflt) :: xp(n), yminp(n), ymaxp(n)
 
-  xp = x(1:n)
+  xp    = x(1:n) + 0*t  ! Use dummy variable t somewhere to prevent compiler complaints
   yminp = ymin(1:n)
   ymaxp = ymax(1:n)
   call plerry(xp, yminp, ymaxp)
+  
 end subroutine pgerry
 !***********************************************************************************************************************************
 
@@ -2099,7 +2113,7 @@ end subroutine pgvsize
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  Find length of a string in a variety of units
+!> \brief  Find length of a string in a variety of units - dummy variable
 !!
 !! \param units   0: normalized device coordinates, 1: in, 2: mm, 3: absolute device coordinates (dots), 4: world coordinates,
 !!                5: fraction of the current viewport size
@@ -2109,17 +2123,22 @@ end subroutine pgvsize
 
 subroutine pglen(units, string, xl, yl)
   implicit none
-  character, intent(in) :: string *(*)
+  character, intent(in) :: string*(*)
   integer, intent(in) :: units
   real, intent(out) :: xl, yl
+  character :: dummy
+  
   print *, "pglen not implemented"
-  xl = 1.0
+  dummy = string(1:1)       ! Use the dummy variable string somewhere to prevent compiler complaints
+  dummy = dummy             ! Use the local variable after setting it to prevent compiler complaints
+  xl = 1.0 + real(0*units)  ! Use the dummy variable units somewhere to prevent compiler complaints
   yl = 1.0
+  
 end subroutine pglen
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  Find bounding box of text string
+!> \brief  Find bounding box of text string - dummy variable
 !!
 !! \param x      World x-coordinate
 !! \param y      World y-coordinate
@@ -2133,18 +2152,31 @@ end subroutine pglen
 
 subroutine pgqtxt(x, y, angle, fjust, text, xbox, ybox)
   implicit none
-  character, intent(in) :: text *(*)
+  character, intent(in) :: text*(*)
   integer, intent(in) :: x, y, angle, fjust
   real, intent(out) :: xbox(4), ybox(4)
+  integer :: dumInt
+  character :: dumStr
+  
+  ! Use the dummy input variables somewhere to prevent compiler complaints:
+  dumStr = text(1:1)
+  dumInt = x + y + angle + fjust
+  ! Use the local variable after setting it to prevent compiler complaints:
+  dumStr = dumStr
+  dumInt = dumInt
+  
   print *, "pgqtxt not implemented"
+  
   xbox(1) = 0.0
   xbox(2) = 1.0
   xbox(3) = 0.0
   xbox(4) = 1.0
+  
   ybox(1) = 0.0
   ybox(2) = 1.0
   ybox(3) = 0.0
   ybox(4) = 1.0
+  
 end subroutine pgqtxt
 !***********************************************************************************************************************************
 
