@@ -1,7 +1,7 @@
 ##  CMakeFile for PG2PLplot
 ##  AF, 2010-11-12
 ##  
-##  Copyright 2010-2013 AstroFloyd - astrofloyd.org
+##  Copyright 2010-2015 AstroFloyd - astrofloyd.org
 ##   
 ##  This file is part of the PG2PLplot package, 
 ##  see: http://pg2plplot.sf.net/

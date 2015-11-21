@@ -3,7 +3,7 @@
 ! 
 ! LICENCE:
 ! 
-! Copyright 2010-2013 AstroFloyd, joequant
+! Copyright 2010-2015 AstroFloyd, joequant
 !  
 ! This file is part of the PG2PLplot package.
 !  
