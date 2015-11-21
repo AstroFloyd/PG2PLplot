@@ -98,13 +98,18 @@ subroutine pgsls(ls)
 end subroutine pgsls
 !***********************************************************************************************************************************
 
-!> \brief query line style
+!***********************************************************************************************************************************
+!> \brief  Query line style
+!!
+!! \param ls  Line style
+
 subroutine pgqls(ls)
   use PG2PLplot, only : cur_lstyle
   implicit none
   integer, intent(out) :: ls
   ls = cur_lstyle
 end subroutine pgqls
+!***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
 !> \brief  Set line width
@@ -467,6 +472,10 @@ end subroutine pgqch
 
 !***********************************************************************************************************************************
 !> \brief  Set arrow head - dummy routine!
+!!
+!! \param fs     Fill style
+!! \param angle  Arrow-point angle
+!! \param barb   Arrow back cut
 
 subroutine pgsah(fs, angle, barb)
   use PG2PLplot, only: compatibility_warnings
@@ -487,11 +496,6 @@ subroutine pgsah(fs, angle, barb)
   
 end subroutine pgsah
 !***********************************************************************************************************************************
-
-
-
-
-
 
 
 !***********************************************************************************************************************************
@@ -1066,6 +1070,7 @@ end subroutine pgbeg
 
 !***********************************************************************************************************************************
 !> \brief  End a plot
+!!
 
 subroutine pgend()
   implicit none
@@ -1204,6 +1209,7 @@ end subroutine pgsubp
 
 !***********************************************************************************************************************************
 !> \brief  Advance to the next (sub-)page
+!!
 
 subroutine pgpage()
   use PG2PLplot, only: do_init
@@ -1225,6 +1231,7 @@ end subroutine pgadvance
 
 !***********************************************************************************************************************************
 !> \brief  Start buffering output - dummy routine!
+!!
 
 subroutine pgbbuf()
   use PG2PLplot, only: compatibility_warnings, do_init
@@ -1243,6 +1250,7 @@ end subroutine pgbbuf
 
 !***********************************************************************************************************************************
 !> \brief  End buffering output - dummy routine!
+!!
 
 subroutine pgebuf()
   use PG2PLplot, only: compatibility_warnings
@@ -1401,6 +1409,12 @@ end subroutine pgtick
 !***********************************************************************************************************************************
 !> \brief  Read data from screen - no PLplot equivalent (yet) - dummy routine!
 !!
+!! \param maxpt   Maximum number of points that may be accepted
+!! \param npt     Number of points entered (zero on first call)
+!! \param x       Array of x-coordinates
+!! \param y       Array of y-coordinates
+!! \param symbol  Code number of symbol to use for markingentered points
+!!
 !! \todo No plplot routine found yet - using dummy
 
 subroutine pgolin(maxpt, npt, x, y, symbol)
@@ -1430,6 +1444,7 @@ end subroutine pgolin
 
 !***********************************************************************************************************************************
 !> \brief  Erase screen
+!!
 
 subroutine pgeras()
   use plplot, only: plclear
@@ -1542,6 +1557,7 @@ end subroutine pgslct
 
 !***********************************************************************************************************************************
 !> \brief  Save parameters
+!!
 
 subroutine pgsave()
   use PG2PLplot, only: save_level, max_level, cur_color
@@ -1567,6 +1583,7 @@ end subroutine pgsave
 
 !***********************************************************************************************************************************
 !> \brief  Unsave parameters
+!!
 
 subroutine pgunsa()
   use PG2PLplot, only: save_level, max_level
@@ -1591,6 +1608,7 @@ subroutine pgunsa()
   call pgsci(save_color(save_level))
   call pgsls(save_lstyle(save_level))
   save_level = save_level - 1
+  
 end subroutine pgunsa
 !***********************************************************************************************************************************
 
@@ -1695,6 +1713,7 @@ end subroutine pgpt1
 
 !***********************************************************************************************************************************
 !> \brief  Close stream
+!!
 
 subroutine pgclos()
   implicit none
@@ -1706,6 +1725,13 @@ end subroutine pgclos
 !***********************************************************************************************************************************
 !> \brief  Get cursor location - dummy routine!
 !!
+!! \param  mode  Display mode (0-7)
+!! \param  posn  If POSN=1, PGBAND tries to place the cursor at (X,Y); if POSN=0, it leaves the cursor at its current position
+!! \param  xref  World x-coordinate of the anchor point
+!! \param  yref  World y-coordinate of the anchor point
+!! \param  x     World x-coordinate of the cursor
+!! \retval y     World y-coordinate of the cursor
+!! \retval ch    Character typed by the user
 
 subroutine pgband(mode, posn, xref, yref, x, y, ch)
   use PG2PLplot, only: compatibility_warnings
@@ -1743,6 +1769,9 @@ end subroutine pgband
 
 !***********************************************************************************************************************************
 !> \brief  Get colour range - dummy routine!
+!!
+!! \param c1  Lower colour index
+!! \param c2  Upper colour index
 
 subroutine pgqcol(c1, c2)
   use PG2PLplot, only: compatibility_warnings
@@ -1879,6 +1908,7 @@ end subroutine pgqvsz
 
 !***********************************************************************************************************************************
 !> \brief  Print user name and date in plot - dummy routine!
+!!
 
 subroutine pgiden()
   use PG2PLplot, only: compatibility_warnings
@@ -1921,6 +1951,7 @@ end subroutine pgqwin
 
 !***********************************************************************************************************************************
 !> \brief  Flush - dummy routine
+!!
 
 subroutine pgupdt()
   return
