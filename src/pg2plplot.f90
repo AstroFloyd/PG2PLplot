@@ -57,7 +57,7 @@ contains
   !*********************************************************************************************************************************
   subroutine do_init()
     implicit none
-    if (.not. is_init) then
+    if(.not. is_init) then
        call plinit()
        call plbop() 
        is_init = .true.
@@ -165,16 +165,16 @@ subroutine pgqcf(cf)
   integer, intent(out) :: cf
   integer :: family, style, weight
   call plgfont(family, style, weight)
-  if (style .eq. 1) then
+  if(style .eq. 1) then
      cf = 3
      return
-  elseif (family .eq. 1) then
+  else if(family .eq. 1) then
      cf = 2
      return
-  elseif (family .eq. 3) then
+  else if(family .eq. 3) then
      cf = 4
      return
-  endif
+  end if
   cf = 1
 end subroutine pgqcf
 
@@ -406,19 +406,19 @@ subroutine pgqcs(unit, xch, ych)
   real(kind=plflt) :: ch1,ch2
   real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
   call plgchr(ch1,ch2)
-  if (unit.eq.2) then
+  if(unit.eq.2) then
      xch = ch2
      ych = ch2
-  elseif (unit .eq. 1) then
+  else if(unit .eq. 1) then
      xch = ch2 / mm_per_inch
      ych = ch2 / mm_per_inch
-  elseif (unit .eq. 0) then
+  else if(unit .eq. 0) then
      call plgpage(xp, yp, xleng, yleng, xoff, yoff)
      xch = ch2 / yleng
      ych = ch2 / yleng
   else
      print *, 'unknown unit in pgqcs', unit
-  endif
+  end if
 
 end subroutine pgqcs
 
@@ -951,7 +951,7 @@ function pgopen(pgdev)
   call plssub(1, 1)
   call plsdev(trim(pldev))
   if(trim(pldev).ne.'xwin') then
-     if (check_error(trim(filename)).ne. 0) then
+     if(check_error(trim(filename)).ne. 0) then
         pgopen = -1
         return
      end if
@@ -1485,9 +1485,7 @@ subroutine pg2pldev(pgdev, pldev,filename)
   !call replace_substring(pldev,'png','pngqt')
   
   ! Use pngcairo rather than png, since I get segfaults if outputing to both X11 and png which pulls in pngqt (joequant):
-  if (pldev .eq. 'png') then
-      pldev = 'pngcairo'
-  end if
+  if(pldev .eq. 'png') pldev = 'pngcairo'
 end subroutine pg2pldev
 !***********************************************************************************************************************************
 
@@ -1507,9 +1505,7 @@ subroutine pgslct(pgdev)
   
   call do_init()
   call plgdev(pldev)
-  if (trim(pldev).eq.'xwin') then
-     call pleop()
-  end if
+  if(trim(pldev).eq.'xwin') call pleop()
   call plsstrm(pgdev-1)
   
 end subroutine pgslct
@@ -1528,7 +1524,7 @@ subroutine pgsave()
   implicit none
   
   save_level = save_level + 1
-  if (save_level.gt.max_level) then
+  if(save_level.gt.max_level) then
      write(0,'(/,A,/)') '***  PG2PLplot WARNING: too many save calls in pgsave()'
      return
   end if
@@ -1551,12 +1547,12 @@ subroutine pgunsa()
   use plplot, only : plsfont
   implicit none
   
-  if (save_level.eq.0) then
+  if(save_level.eq.0) then
      write(0,'(/,A,/)') '***  PG2PLplot WARNING: no save call in stack in pgunsa()'
      return
   end if
   
-  if (save_level.gt.max_level) then
+  if(save_level.gt.max_level) then
      write(0,'(/,A,/)') '***  PG2PLplot WARNING: unsave greater than stack in pgunsa()'
      save_level = save_level - 1
      return
@@ -1763,9 +1759,9 @@ end subroutine pgqci
 
 
 !***********************************************************************************************************************************
-!> \brief get viewport size
+!> \brief  Get viewport size
 !!
-!! \param: units  specify the units of the output parameters:
+!! \param units  specify the units of the output parameters:
 !!                - 0 : normalized device coordinates
 !!                - 1 : inches
 !!                - 2 : millimeters
@@ -1791,24 +1787,24 @@ subroutine pgqvp(units, x1, x2, y1, y2)
      x2 = (x2d * xleng - xoff)
      y1 = (y1d * yleng - yoff)
      y2 = (y2d * yleng - yoff) 
-     if (units .eq. 3) then
+     if(units .eq. 3) then
         return
-     elseif (units .eq. 2) then
+     else if(units .eq. 2) then
         x1 = x1 / xp * mm_per_inch
         x2 = x2 / xp* mm_per_inch
         y1 = y1 / yp * mm_per_inch
         y2 = y2 / yp* mm_per_inch
         return
-     elseif (units .eq. 1) then
+     else if(units .eq. 1) then
         x1 = x1 / xp
         x2 = x2 / xp
         y1 = y1 / yp
         y2 = y2 / yp
         return
-     endif
+     end if
   else
      print *, "unknown units in pgqvp", units
-  endif
+  end if
   x1=x1d
   x2=x2d
   y1=y1d
@@ -1830,23 +1826,23 @@ subroutine pgqvsz(units, x1, x2, y1, y2)
      x2 = 1.0
      y2 = 1.0
      return
-  endif
+  end if
 
   call plgpage(xp, yp, xleng, yleng, xoff, yoff)
-  if (units .eq. 3) then
+  if(units .eq. 3) then
      x2 = xleng
      y2 = yleng
-  elseif (units .eq. 2) then
+  else if(units .eq. 2) then
      x2 = xleng / xp* mm_per_inch
      y2 = yleng / yp* mm_per_inch
-  elseif (units .eq. 1) then
+  else if(units .eq. 1) then
      x2 = x2 / xp
      y2 = y2 / yp
      return
   else
      print *, 'undefined units in pgqvsz'
      return
-  endif
+  end if
 end subroutine pgqvsz
 !***********************************************************************************************************************************
 
@@ -1925,6 +1921,10 @@ end subroutine replace_substring
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Inquire fill-area style - dummy routine
+!!
+!! \retval fs  The current fill-area style
+
 subroutine pgqfs(fs)
   implicit none
   integer, intent(out) :: fs
@@ -1933,6 +1933,10 @@ end subroutine pgqfs
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Set text background color index - dummy routine
+!!
+!! \param b  Background color index
+
 subroutine pgstbg(b)
   implicit none
   integer, intent(in) :: b
@@ -1940,20 +1944,38 @@ end subroutine pgstbg
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Query text background color index - dummy routine
+!!
+!! \param b  Background color index
+
 subroutine pgqtbg(b)
   implicit none
   integer, intent(out) :: b
 end subroutine pgqtbg
 !***********************************************************************************************************************************
 
+
 !***********************************************************************************************************************************
-subroutine pgask(flag)
+!> \brief  Control new page prompting - dummy routine
+!!
+!! \param prompt  Set prompt state to ON for interactive devices
+
+subroutine pgask(prompt)
   implicit none
-  logical, intent(in) :: flag
+  logical, intent(in) :: prompt
 end subroutine pgask
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Set window and viewport and draw labeled frame
+!!
+!! \param xmin  Left
+!! \param xmax  Right
+!! \param ymin  Top (?)
+!! \param ymax  Bottom (?)
+!! \param just  JUST=1: scales of x and y axes are equal, otherwise independent
+!! \param axis  Controls the plotting of axes, tick marks, etc
+
 subroutine pgenv(xmin, xmax, ymin, ymax, just, axis)
   use plplot, only: plflt
   implicit none
@@ -1969,6 +1991,13 @@ end subroutine pgenv
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Plot a histogram of binned data
+!!
+!! \param nbin    Number of bins
+!! \param x       Abscissae of the bins
+!! \param data    Data values of bins
+!! \param center  If .TRUE., the X values denote the center of the bin, else the lower edge
+
 subroutine pgbin(nbin, x, data, center)
   use plplot, only: plflt, plbin
   implicit none
@@ -1979,15 +2008,21 @@ subroutine pgbin(nbin, x, data, center)
   integer :: opt
   xp = x(1:nbin)
   datap = data(1:nbin)
-  if (center) then
-     opt = 1
-  endif
+  if(center) opt = 1
   call plbin(xp, datap, opt)
 end subroutine pgbin
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-subroutine pgerry(n, x, ymin, ymax, t)
+!> \brief  Vertical error bar
+!!
+!! \param n     Number of error bars to plot
+!! \param x     World horizontal coordinates of the data
+!! \param ymax  World vertical coordinates of top end of the error bars
+!! \param ymin  World vertical coordinates of bottom end of the error bars
+!! \param t     Length of terminals to be drawn at the ends of the error bar
+
+subroutine pgerry(n, x, ymax, ymin, t)
   use plplot, only: plflt, plerry
   implicit none
   integer, intent(in) :: n
@@ -2002,6 +2037,13 @@ end subroutine pgerry
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Set viewport (inches)
+!!
+!! \param xleft   Horizontal coordinate of left-hand edge of viewport, in inches from left edge of view surface
+!! \param xright  Horizontal coordinate of right-hand edge of viewport, in inches from left edge of view surface
+!! \param ybot    Vertical coordinate of bottom edge of viewport, in inches from bottom of view surface
+!! \param ytop    Vertical coordinate of top edge of viewport, in inches from bottom of view surface
+
 subroutine pgvsiz(xleft, xright, ybot, ytop)
   use plplot, only: plflt
   implicit none
@@ -2016,6 +2058,13 @@ end subroutine pgvsiz
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Non-standard alias for PGVSIZ
+!!
+!! \param xleft   Horizontal coordinate of left-hand edge of viewport, in inches from left edge of view surface
+!! \param xright  Horizontal coordinate of right-hand edge of viewport, in inches from left edge of view surface
+!! \param ybot    Vertical coordinate of bottom edge of viewport, in inches from bottom of view surface
+!! \param ytop    Vertical coordinate of top edge of viewport, in inches from bottom of view surface
+
 subroutine pgvsize(xleft, xright, ybot, ytop)
   implicit none
   real, intent(in) :: xleft, xright, ybot, ytop
@@ -2024,6 +2073,14 @@ end subroutine pgvsize
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Find length of a string in a variety of units
+!!
+!! \param units   0: normalized device coordinates, 1: in, 2: mm, 3: absolute device coordinates (dots), 4: world coordinates,
+!!                5: fraction of the current viewport size
+!! \param string  String of interest
+!! \param xl      Length of string in horizontal direction
+!! \param yl      Length of string in vertical direction
+
 subroutine pglen(units, string, xl, yl)
   implicit none
   character, intent(in) :: string *(*)
@@ -2036,6 +2093,18 @@ end subroutine pglen
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
+!> \brief  Find bounding box of text string
+!!
+!! \param x      World x-coordinate
+!! \param y      World y-coordinate
+!! \param angle  Angle between baseline and horizontal (degrees)
+!! \param fjust  Horizontal justification
+!! \param text   Text string that would be written
+!!
+!! \retval xbox  Horizontal limits of the bounding box
+!! \retval ybox  Vertical limits of the bounding box
+
+
 subroutine pgqtxt(x, y, angle, fjust, text, xbox, ybox)
   implicit none
   character, intent(in) :: text *(*)
@@ -2085,6 +2154,10 @@ end function reldiff
 
 
 !***********************************************************************************************************************************
+!> \brief  Check whether opening a file gives an error
+!!
+!! \param fname  File name
+
 function check_error(fname)
   implicit none
   character, intent(in) :: fname*(*)
