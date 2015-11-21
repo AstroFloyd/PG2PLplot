@@ -159,7 +159,11 @@ subroutine pgscf(cf)
 end subroutine pgscf
 !***********************************************************************************************************************************
 
-!> \brief set query font
+!***********************************************************************************************************************************
+!> \brief  Query character font
+!!
+!! \retval cf  Character font
+
 subroutine pgqcf(cf)
   implicit none
   integer, intent(out) :: cf
@@ -177,14 +181,25 @@ subroutine pgqcf(cf)
   end if
   cf = 1
 end subroutine pgqcf
+!***********************************************************************************************************************************
 
-!> \brief
+!***********************************************************************************************************************************
+!> \brief  Inquire PGPLOT general information - dummy routine
+!!
+!! \param item
+!! \retval value
+!! \retval length
+
+
 subroutine pgqinf(item, value, length)
   implicit none
   character, intent(in) :: item*(*)
   character, intent(out) :: value*(*)
-  integer, intent(in) :: length
+  integer, intent(out) :: length
+  value = 'Dummy'
+  length = 5
 end subroutine pgqinf
+!***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
 !> \brief  Set colour index
@@ -394,7 +409,12 @@ subroutine pgsch(ch)
 end subroutine pgsch
 !***********************************************************************************************************************************
 
-!>\brief
+!***********************************************************************************************************************************
+!> \brief  Inquire character height in a variety of units
+!!
+!! \param unit  0: normalized device coordinates, 1: in, 2: mm, 3: pixels, 4: world coordinates
+!! \retval xch  The character height for text written with a vertical baseline
+!! \retval ych  The character height for text written with a horizontal baseline (the usual case)
 
 subroutine pgqcs(unit, xch, ych)
   use plplot, only: plflt
@@ -407,20 +427,21 @@ subroutine pgqcs(unit, xch, ych)
   real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
   call plgchr(ch1,ch2)
   if(unit.eq.2) then
-     xch = ch2
-     ych = ch2
+     xch = real(ch2)
+     ych = real(ch2)
   else if(unit .eq. 1) then
-     xch = ch2 / mm_per_inch
-     ych = ch2 / mm_per_inch
+     xch = real(ch2 / mm_per_inch)
+     ych = real(ch2 / mm_per_inch)
   else if(unit .eq. 0) then
      call plgpage(xp, yp, xleng, yleng, xoff, yoff)
-     xch = ch2 / yleng
-     ych = ch2 / yleng
+     xch = real(ch2 / yleng)
+     ych = real(ch2 / yleng)
   else
      print *, 'unknown unit in pgqcs', unit
   end if
 
 end subroutine pgqcs
+!***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
 !> \brief  Query character height
@@ -1745,7 +1766,7 @@ subroutine pgqci(ci)
   use PG2PLplot, only: compatibility_warnings
   
   implicit none
-  integer, intent(out):: ci
+  integer, intent(out) :: ci
   integer, save :: warn
   
   ci = 0
@@ -1776,39 +1797,40 @@ subroutine pgqvp(units, x1, x2, y1, y2)
   use plplot, only: plflt
   use PG2PLplot, only : mm_per_inch
   implicit none
-  integer, intent(in):: units
-  real, intent(out):: x1, x2, y1, y2
+  integer, intent(in) :: units
+  real, intent(out) :: x1, x2, y1, y2
   real(kind=plflt) x1d, x2d, y1d, y2d
   real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
+  
   call plgvpd(x1d, x2d, y1d, y2d)
   if(units .ne. 0) then
      call plgpage(xp, yp, xleng, yleng, xoff, yoff)
-     x1 = (x1d * xleng - xoff) 
-     x2 = (x2d * xleng - xoff)
-     y1 = (y1d * yleng - yoff)
-     y2 = (y2d * yleng - yoff) 
+     x1 = real(x1d * xleng - xoff) 
+     x2 = real(x2d * xleng - xoff)
+     y1 = real(y1d * yleng - yoff)
+     y2 = real(y2d * yleng - yoff) 
      if(units .eq. 3) then
         return
      else if(units .eq. 2) then
-        x1 = x1 / xp * mm_per_inch
-        x2 = x2 / xp* mm_per_inch
-        y1 = y1 / yp * mm_per_inch
-        y2 = y2 / yp* mm_per_inch
+        x1 = x1 / real(xp * mm_per_inch)
+        x2 = x2 / real(xp* mm_per_inch)
+        y1 = y1 / real(yp * mm_per_inch)
+        y2 = y2 / real(yp* mm_per_inch)
         return
      else if(units .eq. 1) then
-        x1 = x1 / xp
-        x2 = x2 / xp
-        y1 = y1 / yp
-        y2 = y2 / yp
+        x1 = x1 / real(xp)
+        x2 = x2 / real(xp)
+        y1 = y1 / real(yp)
+        y2 = y2 / real(yp)
         return
      end if
   else
      print *, "unknown units in pgqvp", units
   end if
-  x1=x1d
-  x2=x2d
-  y1=y1d
-  y2=y2d
+  x1 = real(x1d)
+  x2 = real(x2d)
+  y1 = real(y1d)
+  y2 = real(y2d)
 end subroutine pgqvp
 
 !> \brief get view surface
@@ -1816,9 +1838,10 @@ subroutine pgqvsz(units, x1, x2, y1, y2)
   use plplot, only: plflt
   use PG2PLplot, only : mm_per_inch
   implicit none
-  integer, intent(in):: units
-  real, intent(out):: x1, x2, y1, y2
+  integer, intent(in) :: units
+  real, intent(out) :: x1, x2, y1, y2
   real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
+  
   x1 = 0.0
   y1 = 0.0
 
@@ -1830,14 +1853,14 @@ subroutine pgqvsz(units, x1, x2, y1, y2)
 
   call plgpage(xp, yp, xleng, yleng, xoff, yoff)
   if(units .eq. 3) then
-     x2 = xleng
-     y2 = yleng
+     x2 = real(xleng)
+     y2 = real(yleng)
   else if(units .eq. 2) then
-     x2 = xleng / xp* mm_per_inch
-     y2 = yleng / yp* mm_per_inch
+     x2 = real(xleng / xp* mm_per_inch)
+     y2 = real(yleng / yp* mm_per_inch)
   else if(units .eq. 1) then
-     x2 = x2 / xp
-     y2 = y2 / yp
+     x2 = x2 / real(xp)
+     y2 = y2 / real(yp)
      return
   else
      print *, 'undefined units in pgqvsz'
@@ -1876,13 +1899,15 @@ end subroutine pgiden
 subroutine pgqwin(x1, x2, y1, y2)
   use plplot, only: plflt
   implicit none
-  real, intent(out):: x1, x2, y1, y2
-  real(kind=plflt):: xmin, xmax, ymin, ymax
+  real, intent(out) :: x1, x2, y1, y2
+  real(kind=plflt) :: xmin, xmax, ymin, ymax
+  
   call plgspa(xmin, xmax, ymin, ymax)
-  x1 = xmin
-  x2 = xmax
-  y1 = ymin
-  y2 = ymax
+  x1 = real(xmin)
+  x2 = real(xmax)
+  y1 = real(ymin)
+  y2 = real(ymax)
+  
 end subroutine pgqwin
 !***********************************************************************************************************************************
 
@@ -1951,6 +1976,7 @@ end subroutine pgstbg
 subroutine pgqtbg(b)
   implicit none
   integer, intent(out) :: b
+  b = 0
 end subroutine pgqtbg
 !***********************************************************************************************************************************
 
@@ -2085,7 +2111,7 @@ subroutine pglen(units, string, xl, yl)
   implicit none
   character, intent(in) :: string *(*)
   integer, intent(in) :: units
-  real, intent(out):: xl, yl
+  real, intent(out) :: xl, yl
   print *, "pglen not implemented"
   xl = 1.0
   yl = 1.0
@@ -2109,7 +2135,7 @@ subroutine pgqtxt(x, y, angle, fjust, text, xbox, ybox)
   implicit none
   character, intent(in) :: text *(*)
   integer, intent(in) :: x, y, angle, fjust
-  real, intent(out):: xbox(4), ybox(4)
+  real, intent(out) :: xbox(4), ybox(4)
   print *, "pgqtxt not implemented"
   xbox(1) = 0.0
   xbox(2) = 1.0
