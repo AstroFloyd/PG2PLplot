@@ -1,15 +1,28 @@
-## FindPLplot.cmake:
-## Check for the presence of the PLplot headers and libraries
-## This file is biased to finding Fortran libraries
-## AstroFloyd, October 2010
-
-# Check for the presence of the PLplot headers and libraries
-#
-# This CMake module defines the following variables:
-#  PLplot_FOUND        =  Libraries and headers found; TRUE/FALSE
-#  PLplot_INCLUDE_DIR  =  Path to the PLplot header files
-#  PLplot_LIBRARIES    =  Path to all parts of the PLplot libraries
-#  PLplot_LIBRARY_DIRS =  Path to the directories containing the PLplot libraries
+##  FindPLplot.cmake:
+##  Check for the presence of the PLplot headers and libraries
+##  This file is biased to finding Fortran libraries
+##  AstroFloyd, October 2010
+##  
+##  Copyright (c) 2010-2015 AstroFloyd - astrofloyd.org
+##   
+##  This file is part of the CMakeFiles package,
+##  see: http://cmakefiles.sf.net/
+##   
+##  This is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published
+##  by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+##  
+##  This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+##  
+##  You should have received a copy of the GNU General Public License along with this code.  If not, see 
+##  <http://www.gnu.org/licenses/>.
+##
+##
+##  This CMake module defines the following variables:
+##    PLplot_FOUND        =  Libraries and headers found; TRUE/FALSE
+##    PLplot_INCLUDE_DIR  =  Path to the PLplot header/module files
+##    PLplot_LIBRARIES    =  Path to all parts of the PLplot libraries
+##    PLplot_LIBRARY_DIRS =  Path to the directories containing the PLplot libraries
 
 
 
@@ -55,14 +68,14 @@ if( PLplot_INCLUDE_DIR )
   
   # Check for the library files:
   find_library( PLplot_LIBRARY
-    NAMES plplotf95d_${Fortran_COMPILER_NAME}
+    NAMES plplot_${Fortran_COMPILER_NAME} plplotd_${Fortran_COMPILER_NAME}
     PATHS ${lib_locations}
     PATH_SUFFIXES plplot/${Fortran_COMPILER_NAME} ${Fortran_COMPILER_NAME} plplot
     )
   
   if( NOT PLplot_LIBRARY )
     find_library( PLplot_LIBRARY
-      NAMES plplotd
+      NAMES plplot plplotd
       PATHS ${lib_locations}
       PATH_SUFFIXES plplot
       )
@@ -87,7 +100,7 @@ if( PLplot_INCLUDE_DIR )
   
   # Find cxx bindings:
   find_library( PLplot_cxx_LIBRARY
-    NAMES plplotcxxd
+    NAMES plplotcxx plplotcxxd
     PATHS ${lib_locations}
   )
   if( PLplot_cxx_LIBRARY )
@@ -97,7 +110,7 @@ if( PLplot_INCLUDE_DIR )
   
   # Find F77 bindings:
   find_library( PLplot_f77_LIBRARY
-    NAMES plplotf77d
+    NAMES plplotf77 plplotf77d
     PATHS ${lib_locations}
   )
   if( PLplot_f77_LIBRARY )
@@ -107,7 +120,7 @@ if( PLplot_INCLUDE_DIR )
   
   # Find F90 bindings:
   find_library( PLplot_f90_LIBRARY
-    NAMES plplotf90d
+    NAMES plplotf90 plplotf90d
     PATHS ${lib_locations}
   )
   if( PLplot_f90_LIBRARY )
@@ -118,13 +131,13 @@ if( PLplot_INCLUDE_DIR )
   # Find F95 bindings:
   # Check for COMPILER-SPECIFIC libraries:
   find_library( PLplot_f95_LIBRARY
-    NAMES plplotf95d_${Fortran_COMPILER_NAME}
+    NAMES plplotf95_${Fortran_COMPILER_NAME} plplotf95d_${Fortran_COMPILER_NAME}
     PATHS ${lib_locations}
     )
   # If not found, check for GENERAL libraries:
   if( NOT PLplot_f95_LIBRARY )
     find_library( PLplot_f95_LIBRARY
-      NAMES plplotf95d
+      NAMES plplotf95 plplotf95d
       PATHS ${lib_locations}
       )
   endif( NOT PLplot_f95_LIBRARY )
@@ -136,13 +149,13 @@ if( PLplot_INCLUDE_DIR )
   # Find F95c bindings:
   # Check for COMPILER-SPECIFIC libraries:
   find_library( PLplot_f95c_LIBRARY
-    NAMES plplotf95cd_${Fortran_COMPILER_NAME}
+    NAMES plplotf95c_${Fortran_COMPILER_NAME} plplotf95cd_${Fortran_COMPILER_NAME}
     PATHS ${lib_locations}
     )
   # If not found, check for GENERAL libraries:
   if( NOT PLplot_f95c_LIBRARY )
     find_library( PLplot_f95c_LIBRARY
-      NAMES plplotf95cd
+      NAMES plplotf95c plplotf95cd
       PATHS ${lib_locations}
       )
   endif( NOT PLplot_f95c_LIBRARY )
@@ -153,7 +166,7 @@ if( PLplot_INCLUDE_DIR )
   
   # Find wxwidgets bindings:
   find_library( PLplot_wxwidgets_LIBRARY
-    NAMES plplotwxwidgetsd
+    NAMES plplotwxwidgets plplotwxwidgetsd
     PATHS ${lib_locations}
   )
   if( PLplot_wxwidgets_LIBRARY )
