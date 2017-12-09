@@ -76,6 +76,7 @@ set( include_locations
   /sw/lib/fortran/modules
   ${HOME}/usr/include
   ${HOME}/include
+  ${HOME}/lib/fortran/modules
   CACHE
   PATH
   "Directories to look for include files"
