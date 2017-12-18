@@ -58,7 +58,7 @@ set( LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/usr/lib${LIB_SUFFIX}" )
 
 # Find dependencies:
 find_package( PLplot REQUIRED )
-set( INCLUDE_FLAGS "-I${PLplot_INCLUDE_DIR}" )  # will be transferred to CompilerFlags
+set( INCLUDE_FLAGS "-I${PLplot_INCLUDES}" )  # will be transferred to CompilerFlags
 
 
 # Set source files:
