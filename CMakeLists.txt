@@ -77,6 +77,8 @@ if( CREATE_SHAREDLIB )
     set_target_properties( pg2plplot_shared PROPERTIES OUTPUT_NAME "pg2plplot" )
   endif( COMPILER_SPECIFIC_LIBS )
   set_target_properties( pg2plplot_shared PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY} )
+  execute_process(COMMAND pkg-config --libs plplot-fortran OUTPUT_VARIABLE PKG_LINK OUTPUT_STRIP_TRAILING_WHITESPACE)
+  target_link_libraries( pg2plplot_shared ${PKG_LINK})
 endif( CREATE_SHAREDLIB )
 
 if( CREATE_STATICLIB )
@@ -87,6 +89,7 @@ if( CREATE_STATICLIB )
     set_target_properties( pg2plplot_static PROPERTIES OUTPUT_NAME "pg2plplot" )
   endif( COMPILER_SPECIFIC_LIBS )
   set_target_properties( pg2plplot_static PROPERTIES Fortran_MODULE_DIRECTORY ${MODULE_DIRECTORY} )
+  execute_process(COMMAND pkg-config --cflags plplot-fortran OUTPUT_VARIABLE PKG_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif( CREATE_STATICLIB )
 
 
