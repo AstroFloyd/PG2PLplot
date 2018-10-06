@@ -979,7 +979,7 @@ function pgopen(pgdev)
   integer :: cur_stream=0, check_error, status
   character :: pldev*(99),filename*(99)
   
-  filename = 'plot_temp.png'
+  filename = 'plplot.png'
   
   call pg2pldev(pgdev, pldev,filename)  ! Extract pldev and filename from pgdev
   call plmkstrm(cur_stream)  
@@ -1118,7 +1118,7 @@ subroutine pgpap(width,ratio)
   xoff = 0  ! Offset
   yoff = 0
   
-  call plspage(xp,yp,xlen,ylen,xoff,yoff)  ! Must be called before plinit()!
+  call plspage(xp,yp, xlen,ylen, xoff,yoff)  ! Must be called before plinit()!
   call do_init()
   
 end subroutine pgpap
@@ -1211,6 +1211,35 @@ subroutine pgwindow(xmin,xmax,ymin,ymax)
   call pgswin(xmin,xmax,ymin,ymax)
   
 end subroutine pgwindow
+!***********************************************************************************************************************************
+
+
+!***********************************************************************************************************************************
+!> \brief  Set window and adjust viewport to same aspect ratio.  Note that the a PLplot function does not exist;
+!!           the result is similar, but not always identical!
+!!
+!! \param xmin  Left
+!! \param xmax  Right
+!! \param ymin  Top
+!! \param ymax  Bottom
+
+subroutine pgwnad(xmin,xmax,ymin,ymax)
+  use plplot, only: plflt, plwind, plvasp, plspage
+  
+  implicit none
+  real, intent(in) :: xmin,xmax,ymin,ymax
+  real(kind=plflt) :: xmin2,xmax2,ymin2,ymax2
+  
+  xmin2 = dble(xmin)
+  xmax2 = dble(xmax)
+  ymin2 = dble(ymin)
+  ymax2 = dble(ymax)
+  !write(6,'(A,2(4F10.3,5x))')'  pgwnad: ',xmin,xmax,ymin,ymax, xmin2,xmax2,ymin2,ymax2
+  
+  call plvasp(abs((ymax2-ymin2)/(xmax2-xmin2)))     ! Set view port in plot window using world-coordinate aspect ratio
+  call plwind(xmin2,xmax2,ymin2,ymax2)
+  
+end subroutine pgwnad
 !***********************************************************************************************************************************
 
 
