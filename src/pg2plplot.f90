@@ -1058,11 +1058,12 @@ subroutine pgbegin(i,pgdev,nx,ny)
   call plsdev(trim(pldev))  
   is_init = .false.
   call plspause(.false.)                ! Pause at plend()
+  
 end subroutine pgbegin
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief  Alias for pgbegin
+!> \brief  Non-standard alias for pgbegin()
 !!
 !! \param i      Display ID
 !! \param pgdev  PGplot device
@@ -1127,24 +1128,26 @@ end subroutine pgpap
 !***********************************************************************************************************************************
 !> \brief  Set view port
 !!
-!! \param xl1  Left side of the x-axis
-!! \param xr1  Right side of the x-axis
-!! \param yb1  Bottom side of the y-axis
-!! \param yt1  Top side of the y-axis
+!! \param xl  Left side of the x-axis
+!! \param xr  Right side of the x-axis
+!! \param yb  Bottom side of the y-axis
+!! \param yt  Top side of the y-axis
 
-subroutine pgsvp(xl1,xr1,yb1,yt1)
+subroutine pgsvp(xl,xr,yb,yt)
+  use PG2PLplot, only: do_init
   use plplot, only: plflt, plvpor
   
   implicit none
-  real, intent(in) :: xl1,xr1,yb1,yt1
+  real, intent(in) :: xl,xr,yb,yt
   real(kind=plflt) :: xl2,xr2,yb2,yt2
   
-  xl2 = xl1
-  xr2 = xr1
-  yb2 = yb1
-  yt2 = yt1
-  !write(6,'(A,2(4F10.3,5x))')'  pgsvp: ',xl1,xr1,yb1,yt1,xl2,xr2,yb2,yt2
+  xl2 = xl
+  xr2 = xr
+  yb2 = yb
+  yt2 = yt
+  !write(6,'(A,2(4F10.3,5x))')'  pgsvp: ',xl,xr,yb,yt, xl2,xr2,yb2,yt2
   
+  call do_init()
   call plvpor(xl2,xr2,yb2,yt2)
   
 end subroutine pgsvp
@@ -1152,54 +1155,64 @@ end subroutine pgsvp
 
 
 !***********************************************************************************************************************************
+!> \brief  Set view port - non-standard alias for pgsvp()
+!!
+!! \param xl  Left side of the x-axis
+!! \param xr  Right side of the x-axis
+!! \param yb  Bottom side of the y-axis
+!! \param yt  Top side of the y-axis
+
+subroutine pgvport(xl,xr,yb,yt)
+  implicit none
+  real, intent(in) :: xl,xr,yb,yt
+  call pgsvp(xl,xr,yb,yt)
+  
+end subroutine pgvport
+!***********************************************************************************************************************************
+
+
+!***********************************************************************************************************************************
 !> \brief  Set window
 !!
-!! \param xmin1  Left
-!! \param xmax1  Right
-!! \param ymin1  Top
-!! \param ymax1  Bottom
+!! \param xmin  Left
+!! \param xmax  Right
+!! \param ymin  Top
+!! \param ymax  Bottom
 
-subroutine pgswin(xmin1,xmax1,ymin1,ymax1)
+subroutine pgswin(xmin,xmax,ymin,ymax)
   use plplot, only: plflt, plwind
   
   implicit none
-  real, intent(in) :: xmin1,xmax1,ymin1,ymax1
+  real, intent(in) :: xmin,xmax,ymin,ymax
   real(kind=plflt) :: xmin2,xmax2,ymin2,ymax2
   
-  xmin2 = xmin1
-  xmax2 = xmax1
-  ymin2 = ymin1
-  ymax2 = ymax1
-  !write(6,'(A,2(4F10.3,5x))')'  pgswin: ',xmin1,xmax1,ymin1,ymax1,xmin2,xmax2,ymin2,ymax2
-  
+  xmin2 = dble(xmin)
+  xmax2 = dble(xmax)
+  ymin2 = dble(ymin)
+  ymax2 = dble(ymax)
+  !write(6,'(A,2(4F10.3,5x))')'  pgswin: ',xmin,xmax,ymin,ymax, xmin2,xmax2,ymin2,ymax2
+
   call plwind(xmin2,xmax2,ymin2,ymax2)
   
 end subroutine pgswin
 !***********************************************************************************************************************************
 
 !***********************************************************************************************************************************
-!> \brief alias for pgswin
+!> \brief Non-standard alias for pgswin
 !!
-!! \param xmin1  Left
-!! \param xmax1  Right
-!! \param ymin1  Top
-!! \param ymax1  Bottom
+!! \param xmin  Left
+!! \param xmax  Right
+!! \param ymin  Top
+!! \param ymax  Bottom
 
-subroutine pgwindow(xmin1,xmax1,ymin1,ymax1)
-  use plplot, only: plflt, plwind
+subroutine pgwindow(xmin,xmax,ymin,ymax)
+  real, intent(in) :: xmin,xmax,ymin,ymax
   
-  implicit none
-  real, intent(in) :: xmin1,xmax1,ymin1,ymax1
-  real(kind=plflt) :: xmin2,xmax2,ymin2,ymax2
-  
-  xmin2 = dble(xmin1)
-  xmax2 = dble(xmax1)
-  ymin2 = dble(ymin1)
-  ymax2 = dble(ymax1)
-  call plwind(xmin2,xmax2,ymin2,ymax2)
+  call pgswin(xmin,xmax,ymin,ymax)
   
 end subroutine pgwindow
 !***********************************************************************************************************************************
+
 
 
 !***********************************************************************************************************************************
@@ -1521,7 +1534,7 @@ subroutine pg2pldev(pgdev, pldev,filename)
   i = index(pgdev, '/', back=.true.)
   
   filename = ' '
-  if(i.ne.1) filename = pgdev(1:i-1)
+  if(i.gt.1) filename = pgdev(1:i-1)
   
   pldev = ' '
   pldev = pgdev(i+1:)
@@ -1541,6 +1554,15 @@ subroutine pg2pldev(pgdev, pldev,filename)
   
   ! Use pngcairo rather than png, since I get segfaults if outputing to both X11 and png which pulls in pngqt (joequant):
   if(pldev .eq. 'png') pldev = 'pngcairo'
+  
+  ! If a file name was not provided:
+  if(len_trim(filename).eq.0) then
+     filename = 'plplot'
+     if(index(pldev, 'ps').ne.0) filename = 'plplot.ps'
+     if(index(pldev, 'pdf').ne.0) filename = 'plplot.pdf'
+     if(index(pldev, 'xfig').ne.0) filename = 'plplot.xfig'
+     !if(index(pldev, 'xxx').ne.0) filename = 'plplot.xxx'
+  end if
   
 end subroutine pg2pldev
 !***********************************************************************************************************************************
