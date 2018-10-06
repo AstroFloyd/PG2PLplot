@@ -56,13 +56,16 @@ contains
   
   !*********************************************************************************************************************************
   subroutine do_init()
-    use plplot, only: plbop, plinit
+    use plplot, only: plbop, plinit, plcol0
+    
     implicit none
     if(.not. is_init) then
        call plinit()
-       call plbop() 
+       call plbop()
+       call plcol0(15)  ! Set default pen colour to black
        is_init = .true.
     end if
+    
   end subroutine do_init
   !*********************************************************************************************************************************
   
@@ -225,12 +228,13 @@ subroutine pgsci(ci1)
   cur_color = ci1
   ci2 = 15  ! White
   ci2 = ci1
-  colours = (/0,15,1,3,9,7,13,2,8,12,4,11,10,5,7,7/)
+  !colours = [0,15, 1,3,9, 7,13,2,8,12,4,11,10,5,7,7]
+  colours = [0,15, 11,13,2, 1,3, 9,8,12,4,7,10,5,7,7]
   if(ci1.ge.0.and.ci1.le.15) ci2 = colours(ci1)
   
   call plcol0(ci2)
   
-  !write(6,'(A,2I6)')'  pgsci: ',ci1,ci2
+  !write(*,'(A,2I6)')'  pgsci: ',ci1,ci2
   
 end subroutine pgsci
 !***********************************************************************************************************************************
@@ -261,7 +265,7 @@ subroutine pgscr(ci1, r,g,b)
   
   call plscol0(ci2, ri,gi,bi)
   
-  !write(6,'(A,2I6, 5x,3F10.3, 5x,3I6)')'  pgscr: ',ci1,ci2, r,g,b, ri,gi,bi
+  !write(*,'(A,2I6, 5x,3F10.3, 5x,3I6)')'  pgscr: ',ci1,ci2, r,g,b, ri,gi,bi
   
 end subroutine pgscr
 !***********************************************************************************************************************************
@@ -291,7 +295,7 @@ subroutine pgqcr(ci1, r,g,b)
   g = real(gi)/255.
   b = real(bi)/255.
   
-  !write(6,'(A,2I6,5x,3I6,5x,3F10.3)')'  pgqcr: ',ci1,ci2, ri,gi,bi, r,g,b
+  !write(*,'(A,2I6,5x,3I6,5x,3F10.3)')'  pgqcr: ',ci1,ci2, ri,gi,bi, r,g,b
   
 end subroutine pgqcr
 !***********************************************************************************************************************************
@@ -529,8 +533,8 @@ subroutine pgline(n,x1,y1)
   
   call plline(x2,y2)
   
-  !write(6,'(A,99ES16.9)')'  pgline1:  ',x1(1:min(n,9)),y1(1:min(n,9))
-  !write(6,'(A,99ES16.9)')'  pgline2:  ',x2(1:min(n,9)),y2(1:min(n,9))
+  !write(*,'(A,99ES16.9)')'  pgline1:  ',x1(1:min(n,9)),y1(1:min(n,9))
+  !write(*,'(A,99ES16.9)')'  pgline2:  ',x2(1:min(n,9)),y2(1:min(n,9))
   
 end subroutine pgline
 !***********************************************************************************************************************************
@@ -813,8 +817,8 @@ subroutine pgptxt(x1,y1,ang,just1,text)
   
   call plptex(x2,y2,dx,dy,just2,trim(text1))
   
-  !write(6,'(A,4F10.3,A)')'  pgptxt: ',x1,y1,ang,just1,trim(text)
-  !write(6,'(A,5F10.3,A)')'  pgptxt: ',x2,y2,dx,dy,just2,trim(text1)
+  !write(*,'(A,4F10.3,A)')'  pgptxt: ',x1,y1,ang,just1,trim(text)
+  !write(*,'(A,5F10.3,A)')'  pgptxt: ',x2,y2,dx,dy,just2,trim(text1)
   
 end subroutine pgptxt
 !***********************************************************************************************************************************
@@ -896,7 +900,7 @@ subroutine pgmtxt(side, disp1, pos1, just1, text)
   pos2  = pos1
   just2 = just1
   
-  !write(6,'(2A,2(3F10.3,5x),A)')'  pgmtxt: ',trim(side),disp1,pos1,just1,disp2,pos2,just2,trim(text)
+  !write(*,'(2A,2(3F10.3,5x),A)')'  pgmtxt: ',trim(side),disp1,pos1,just1,disp2,pos2,just2,trim(text)
   
   text1 = text
   call pg2pltext(text1)
@@ -1145,7 +1149,7 @@ subroutine pgsvp(xl,xr,yb,yt)
   xr2 = xr
   yb2 = yb
   yt2 = yt
-  !write(6,'(A,2(4F10.3,5x))')'  pgsvp: ',xl,xr,yb,yt, xl2,xr2,yb2,yt2
+  !write(*,'(A,2(4F10.3,5x))')'  pgsvp: ',xl,xr,yb,yt, xl2,xr2,yb2,yt2
   
   call do_init()
   call plvpor(xl2,xr2,yb2,yt2)
@@ -1190,7 +1194,7 @@ subroutine pgswin(xmin,xmax,ymin,ymax)
   xmax2 = dble(xmax)
   ymin2 = dble(ymin)
   ymax2 = dble(ymax)
-  !write(6,'(A,2(4F10.3,5x))')'  pgswin: ',xmin,xmax,ymin,ymax, xmin2,xmax2,ymin2,ymax2
+  !write(*,'(A,2(4F10.3,5x))')'  pgswin: ',xmin,xmax,ymin,ymax, xmin2,xmax2,ymin2,ymax2
 
   call plwind(xmin2,xmax2,ymin2,ymax2)
   
@@ -1234,7 +1238,7 @@ subroutine pgwnad(xmin,xmax,ymin,ymax)
   xmax2 = dble(xmax)
   ymin2 = dble(ymin)
   ymax2 = dble(ymax)
-  !write(6,'(A,2(4F10.3,5x))')'  pgwnad: ',xmin,xmax,ymin,ymax, xmin2,xmax2,ymin2,ymax2
+  !write(*,'(A,2(4F10.3,5x))')'  pgwnad: ',xmin,xmax,ymin,ymax, xmin2,xmax2,ymin2,ymax2
   
   call plvasp(abs((ymax2-ymin2)/(xmax2-xmin2)))     ! Set view port in plot window using world-coordinate aspect ratio
   call plwind(xmin2,xmax2,ymin2,ymax2)
@@ -1343,7 +1347,7 @@ subroutine pgbox(xopt, xtick1, nxsub, yopt, ytick1, nysub)
   
   xtick2 = xtick1
   ytick2 = ytick1
-  !write(6,'(A,2(2F10.3,5x))')'  pgbox: ',xtick1,ytick1,xtick2,ytick2
+  !write(*,'(A,2(2F10.3,5x))')'  pgbox: ',xtick1,ytick1,xtick2,ytick2
   
   call plbox(xopt, xtick2, nxsub, yopt, ytick2, nysub)
   
