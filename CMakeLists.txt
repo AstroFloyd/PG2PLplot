@@ -25,15 +25,6 @@
 
 cmake_minimum_required( VERSION 2.6 FATAL_ERROR )
 
-# Set build type. Do this *before* we set the project name:
-if( NOT CMAKE_BUILD_TYPE )
-  set( CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-    "Choose the type of build, options are: None Debug Release RelWithDebInfo Profile."
-    FORCE )
-endif( NOT CMAKE_BUILD_TYPE )
-set( CMAKE_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}" CACHE INTERNAL "internal" )
-
-
 # Project name and language:
 project( PG2PLplot Fortran )
 
