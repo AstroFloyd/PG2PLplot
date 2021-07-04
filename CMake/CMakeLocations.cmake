@@ -29,7 +29,7 @@
 
 # User's home directory:
 set( HOME $ENV{HOME} )
-  
+set( MODULEDIR $ENV{MODULEDIR} )
 
 set( search_locations
   /usr
@@ -37,6 +37,7 @@ set( search_locations
   /opt
   /opt/local
   /sw
+  ${MODULEDIR}/plplot
   ${HOME}/usr
   CACHE
   PATH
@@ -77,6 +78,7 @@ set( include_locations
   ${HOME}/usr/include
   ${HOME}/include
   ${HOME}/lib/fortran/modules
+  ${MODULEDIR}/plplot
   CACHE
   PATH
   "Directories to look for include files"
