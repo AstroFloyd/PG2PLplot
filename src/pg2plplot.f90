@@ -1572,6 +1572,11 @@ subroutine pg2pldev(pgdev, pldev,filename)
   pldev = ' '
   pldev = pgdev(i+1:)
   
+  ! Change PGPlot screen to PLplot screen:
+  call replace_substring(pldev,'xserve','xwin')  ! X server does not exist in PLplot!
+  ! call replace_substring(pldev,'xwin','qtwidget')  ! Use qt instead
+  ! call replace_substring(pldev,'xwin','xcairo')  ! Use cairo instead
+  
   ! Change PGPlot ps to PLplot ps:
   call replace_substring(pldev,'vcps','psc')
   call replace_substring(pldev,'cvps','psc')
