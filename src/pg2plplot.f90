@@ -970,8 +970,12 @@ end subroutine pglabel
 !!
 !! \param pgdev  PGplot device
 !!
-!! This function creates a new stream for each xwin request, but uses the same stream (0) for each file stream request.
-!! Xwin streams are treated differently, since we want bufferring for smooth animations whereas the other streams are non-buffered.
+!! This function creates a new stream for each xwin request, but uses the same stream (0) for each file stream
+!! request.  Xwin streams are treated differently, since we want bufferring for smooth animations whereas the
+!! other streams are non-buffered.
+!!
+!! \todo
+!! - 2024-01, AF: call plmkstrm(cur_stream) seems to crash program...?
 
 function pgopen(pgdev)
   use plplot, only: plspause, plsfnam, plsdev, plmkstrm, plsetopt, plssub, plfontld
@@ -986,7 +990,7 @@ function pgopen(pgdev)
   filename = 'plplot.png'
   
   call pg2pldev(pgdev, pldev,filename)  ! Extract pldev and filename from pgdev
-  call plmkstrm(cur_stream)  
+  ! call plmkstrm(cur_stream)  ! 2024-01, AF: crashes program...?
   call plssub(1, 1)
   call plsdev(trim(pldev))
   if(trim(pldev).ne.'xwin') then
