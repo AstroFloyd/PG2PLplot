@@ -1003,7 +1003,7 @@ function pgopen(pgdev)
      status = plsetopt("db", "")
   end if
   
-  !call plscolbg(255,255,255)           ! Set background colour to white
+  ! call plscolbg(255,255,255)          ! Set background colour to white
   call plfontld(1)                      ! Load extended character set(?)
   call plspause(.false.)                ! Pause at plend()
   
@@ -1470,36 +1470,43 @@ end subroutine pgtick
 
 
 !***********************************************************************************************************************************
-!> \brief  Read data from screen - no PLplot equivalent (yet) - dummy routine!
-!!
+!> \brief  Read coordinates from screen upon mouse click
+!! 
 !! \param maxpt   Maximum number of points that may be accepted
-!! \param npt     Number of points entered (zero on first call)
-!! \param x       Array of x-coordinates
-!! \param y       Array of y-coordinates
+!! \param npt     Number of points entered (zero on call)
+!! \param xarr    Array of x-coordinates
+!! \param yarr    Array of y-coordinates
 !! \param symbol  Code number of symbol to use for markingentered points
-!!
-!! \todo No plplot routine found yet - using dummy
+!! 
+!! \todo  Plotting a symbol doesn't seem to work...
 
-subroutine pgolin(maxpt, npt, x, y, symbol)
+subroutine pgolin(maxpt, npt, xarr, yarr, symbol)
   use PG2PLplot, only: compatibility_warnings
+  use plplot, only: PLGraphicsIn, plGetCursor, plpoin
   
   implicit none
   integer, intent(in) :: maxpt,symbol
   integer, intent(out) :: npt
-  real, intent(out) :: x(maxpt),y(maxpt)
+  real, intent(out) :: xarr(maxpt),yarr(maxpt)
+  type(PLGraphicsIn) :: gin
   
-  integer :: symbol1
+  integer :: symbol1, plgetcursor_rc
   integer, save :: warn
   
-  npt = maxpt
-  x = 0.d0
-  y = 0.d0
-  symbol1 = symbol
-  symbol1 = symbol1  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
-  
-  if(.not.compatibility_warnings) warn = 123  ! Don't warn about compatibility between PGPlot and PLplot
-  if(warn.ne.123) call warn_dummy_routine('pgolin', '')
-  warn = 123
+  do while(npt.lt.maxpt)
+     plgetcursor_rc = plGetCursor(gin)  ! Register click
+     
+     if(gin%button.eq.3) exit    ! Clicking right mouse button quits
+     if(gin%string.eq.'x') exit  ! Pressing key 'x' quits
+     
+     npt = npt + 1
+     xarr(npt) = real(gin%wX)
+     yarr(npt) = real(gin%wY)
+     
+     ! Plot a symbol at the selection - AF 2024-01-28: doesn't seem to work - why?
+     call plpoin([gin%wX], [gin%wY], 2)
+     ! call pgpt1(gin%wX, gin%wY, symbol)
+  end do
   
 end subroutine pgolin
 !***********************************************************************************************************************************
