@@ -1481,7 +1481,6 @@ end subroutine pgtick
 !! \todo  Plotting a symbol doesn't seem to work...
 
 subroutine pgolin(maxpt, npt, xarr, yarr, symbol)
-  use PG2PLplot, only: compatibility_warnings
   use plplot, only: PLGraphicsIn, plGetCursor, plpoin
   
   implicit none
@@ -1490,8 +1489,7 @@ subroutine pgolin(maxpt, npt, xarr, yarr, symbol)
   real, intent(out) :: xarr(maxpt),yarr(maxpt)
   type(PLGraphicsIn) :: gin
   
-  integer :: symbol1, plgetcursor_rc
-  integer, save :: warn
+  integer :: plgetcursor_rc
   
   do while(npt.lt.maxpt)
      plgetcursor_rc = plGetCursor(gin)  ! Register click
@@ -1505,7 +1503,7 @@ subroutine pgolin(maxpt, npt, xarr, yarr, symbol)
      
      ! Plot a symbol at the selection - AF 2024-01-28: doesn't seem to work - why?
      call plpoin([gin%wX], [gin%wY], 2)
-     ! call pgpt1(gin%wX, gin%wY, symbol)
+     if(.false.) call pgpt1(gin%wX, gin%wY, symbol)
   end do
   
 end subroutine pgolin
