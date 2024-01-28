@@ -993,7 +993,7 @@ function pgopen(pgdev)
   ! call plmkstrm(cur_stream)  ! 2024-01, AF: crashes program...?
   call plssub(1, 1)
   call plsdev(trim(pldev))
-  if(trim(pldev).ne.'xwin') then
+  if( (trim(pldev).ne.'xwin') .and. (trim(pldev).ne.'qtwidget') .and. (trim(pldev).ne.'xcairo')) then
      if(check_error(trim(filename)).ne. 0) then
         pgopen = -1
         return
