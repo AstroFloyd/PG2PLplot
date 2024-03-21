@@ -1587,17 +1587,17 @@ subroutine pg2pldev(pgdev, pldev,filename)
   ! call replace_substring(pldev,'xwin','xcairo')  ! Use cairo instead
   
   ! Change PGPlot ps to PLplot ps:
-  call replace_substring(pldev,'vcps','psc')
-  call replace_substring(pldev,'cvps','psc')
-  call replace_substring(pldev,'cps','psc')
-  call replace_substring(pldev,'vps','ps')
+  call replace_substring(pldev, 'vcps', 'epscairo')  ! 'psc')
+  call replace_substring(pldev, 'cvps', 'epscairo')  ! 'psc')
+  call replace_substring(pldev, 'cps',  'epscairo')  ! 'psc')
+  call replace_substring(pldev, 'vps',  'epscairo')  ! 'ps')
   
   ! Change PGplot ppm output tot png:
-  call replace_substring(pldev,'ppm','png')
-  call replace_substring(filename,'ppm','png')
+  call replace_substring(pldev,    'ppm', 'png')
+  call replace_substring(filename, 'ppm', 'png')
   
   ! Use pngqt rather than png:
-  !call replace_substring(pldev,'png','pngqt')
+  ! call replace_substring(pldev,'png','pngqt')
   
   ! Use pngcairo rather than png, since I get segfaults if outputing to both X11 and png which pulls in pngqt (joequant):
   if(pldev .eq. 'png') pldev = 'pngcairo'
@@ -1608,7 +1608,7 @@ subroutine pg2pldev(pgdev, pldev,filename)
      if(index(pldev, 'ps').ne.0) filename = 'plplot.ps'
      if(index(pldev, 'pdf').ne.0) filename = 'plplot.pdf'
      if(index(pldev, 'xfig').ne.0) filename = 'plplot.xfig'
-     !if(index(pldev, 'xxx').ne.0) filename = 'plplot.xxx'
+     ! if(index(pldev, 'xxx').ne.0) filename = 'plplot.xxx'
   end if
   
 end subroutine pg2pldev
