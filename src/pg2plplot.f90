@@ -226,15 +226,20 @@ subroutine pgsci(ci1)
   integer, intent(in) :: ci1
   integer :: ci2,colours(0:15)
   cur_color = ci1
-  ci2 = 15  ! White
+  
+  ! Define mapping table:
+  !          b w    r  g  b    m  c  y  o   lg lc lb   dm rp   dg lgrey
+  !          0,1,   2, 3, 4,   5, 6, 7, 8,   9,10,11,  12,13,  14,15
+  ! colours = [0,15,  1, 3, 9,   7,13, 2, 8,  12, 4,11,  10, 5,   7, 7]  ! v1 - old?
+  colours = [0,15,  1, 3, 9,  10, 4, 2,14,   3,11,12,  10,13,   7,15]  ! v1 - new?
+  ! colours = [0,15, 11,13, 2,   1, 3, 9, 8,  12, 4, 7,  10, 5,   7, 7]  ! v2?
+  
   ci2 = ci1
-  !colours = [0,15, 1,3,9, 7,13,2,8,12,4,11,10,5,7,7]
-  colours = [0,15, 11,13,2, 1,3, 9,8,12,4,7,10,5,7,7]
   if(ci1.ge.0.and.ci1.le.15) ci2 = colours(ci1)
   
   call plcol0(ci2)
   
-  !write(*,'(A,2I6)')'  pgsci: ',ci1,ci2
+  ! write(*,'(A,2I6)')'  pgsci: ',ci1,ci2
   
 end subroutine pgsci
 !***********************************************************************************************************************************
@@ -1605,8 +1610,8 @@ subroutine pg2pldev(pgdev, pldev,filename)
   ! If a file name was not provided:
   if(len_trim(filename).eq.0) then
      filename = 'plplot'
-     if(index(pldev, 'ps').ne.0) filename = 'plplot.ps'
-     if(index(pldev, 'pdf').ne.0) filename = 'plplot.pdf'
+     if(index(pldev, 'ps').ne.0)   filename = 'plplot.ps'
+     if(index(pldev, 'pdf').ne.0)  filename = 'plplot.pdf'
      if(index(pldev, 'xfig').ne.0) filename = 'plplot.xfig'
      ! if(index(pldev, 'xxx').ne.0) filename = 'plplot.xxx'
   end if
